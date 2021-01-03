@@ -61,6 +61,7 @@ QT_BEGIN_NAMESPACE
 
 class QCanBusFrame;
 class QLabel;
+class Model4view;
 
 namespace Ui {
 class MainWindow;
@@ -96,6 +97,7 @@ private:
     QLabel *m_written = nullptr;
     ConnectDialog *m_connectDialog = nullptr;
     QCanBusDevice *m_canDevice = nullptr;
+    Model4view *_model;
 };
 
 #endif // MAINWINDOW_H
