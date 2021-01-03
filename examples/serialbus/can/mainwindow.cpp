@@ -51,6 +51,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "connectdialog.h"
+#include "model4view.h"
 
 #include <QCanBus>
 #include <QCanBusFrame>
@@ -74,6 +75,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
+
+    _model = new Model4view(this);
+    m_ui->receivedMessagesView->setModel(_model);
 }
 
 MainWindow::~MainWindow()
@@ -237,6 +241,7 @@ void MainWindow::processReceivedFrames()
         const QString flags = frameFlags(frame);
 
         m_ui->receivedMessagesEdit->append(time + flags + view);
+        _model->insertFrame(QStringList() << time << flags << view);
     }
 }
 
