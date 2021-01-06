@@ -29,22 +29,6 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QLabel" name="label_3">
-         <property name="font">
-          <font>
-           <family>Courier</family>
-           <kerning>false</kerning>
-          </font>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="text">
-          <string>Timestamp        Flags  CAN-ID   DLC  Data</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QTableView" name="receivedMessagesView"/>
        </item>
       </layout>

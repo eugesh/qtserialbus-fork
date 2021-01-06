@@ -58,6 +58,7 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QTimer>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -105,7 +106,6 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
-    //connect(m_ui->actionClearLog, &QAction::triggered, m_ui->receivedMessagesEdit, &QTextEdit::clear);
     connect(m_ui->actionClearLog, &QAction::triggered, m_model, &Model4view::deletAll);
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
@@ -248,7 +248,6 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        // m_ui->receivedMessagesEdit->append(time + flags + view);
         m_model->insertFrame(QStringList() << time << flags << view);
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
