@@ -45,28 +45,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="receivedMessagesEdit">
-         <property name="font">
-          <font>
-           <family>Courier</family>
-           <kerning>false</kerning>
-          </font>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="undoRedoEnabled">
-          <bool>false</bool>
-         </property>
-         <property name="lineWrapMode">
-          <enum>QTextEdit::NoWrap</enum>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QTableView" name="receivedMessagesView"/>
        </item>
       </layout>
@@ -177,6 +155,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="can.qrc"/>
   <include location="can.qrc"/>
  </resources>
  <connections/>

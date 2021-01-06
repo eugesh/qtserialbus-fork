@@ -92,12 +92,14 @@ private:
     void initActionsConnections();
 
     qint64 m_numberFramesWritten = 0;
+    qint64 m_numberFramesReceived = 0;
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
     QLabel *m_written = nullptr;
+    QLabel *m_received = nullptr;
     ConnectDialog *m_connectDialog = nullptr;
     QCanBusDevice *m_canDevice = nullptr;
-    Model4view *_model;
+    Model4view *m_model;
 };
 
 #endif // MAINWINDOW_H
