@@ -14,11 +14,9 @@ Model4view::~Model4view()
 bool Model4view::insertRows(int row, int count, const QModelIndex &parent)
 {
     Q_UNUSED(parent)
+    Q_UNUSED(count)
 
     beginInsertRows(parent, row, row);
-
-    if(_framesQ.size() == row && count == 1) {
-    }
 
     endInsertRows();
 
@@ -28,11 +26,9 @@ bool Model4view::insertRows(int row, int count, const QModelIndex &parent)
 bool Model4view::removeRows(int row, int count, const QModelIndex &parent)
 {
     Q_UNUSED(parent)
+    Q_UNUSED(count)
 
     beginRemoveRows(parent, row, row);
-
-    if(_framesQ.size() == row && count == 1) {
-    }
 
     endRemoveRows();
 
@@ -66,11 +62,11 @@ QVariant Model4view::data(const QModelIndex &index, int role) const
 
     switch (column) {
     case 0:
-        return _framesQ[row][0];
+        return m_framesQ[row][0];
     case 1:
-        return _framesQ[row][1];
+        return m_framesQ[row][1];
     case 2:
-        return _framesQ[row][2];
+        return m_framesQ[row][2];
     }
 
     return QVariant();
@@ -80,7 +76,7 @@ int Model4view::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
 
-    return _framesQ.size();
+    return m_framesQ.size();
 }
 
 int Model4view::columnCount(const QModelIndex &parent) const
@@ -92,11 +88,11 @@ int Model4view::columnCount(const QModelIndex &parent) const
 
 void Model4view::insertFrame(const QStringList & list)
 {
-    insertRow(_framesQ.size());
+    insertRow(m_framesQ.size());
 
-    _framesQ.enqueue(list);
+    m_framesQ.enqueue(list);
 
-    if (_qLimit < rowCount()) {
+    if (m_qLimit < rowCount()) {
         removeFirstRow();
     }
 }
@@ -106,7 +102,7 @@ void Model4view::removeFirstRow()
     if (rowCount()) {
         removeRow(0);
 
-        _framesQ.dequeue();
+        m_framesQ.dequeue();
     }
 }
 

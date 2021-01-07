@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->receivedMessagesView->setModel(m_model);
     m_ui->receivedMessagesView->setColumnWidth(0, 150);
     m_ui->receivedMessagesView->setColumnWidth(1, 25);
-    m_ui->receivedMessagesView->setColumnWidth(2, 200);
+    m_ui->receivedMessagesView->setColumnWidth(2, 250);
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
