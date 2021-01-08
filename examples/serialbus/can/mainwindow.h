@@ -62,6 +62,7 @@ QT_BEGIN_NAMESPACE
 class QCanBusFrame;
 class QLabel;
 class QTimer;
+class Model4view;
 
 namespace Ui {
 class MainWindow;
@@ -93,12 +94,15 @@ private:
     void initActionsConnections();
 
     qint64 m_numberFramesWritten = 0;
+    qint64 m_numberFramesReceived = 0;
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
     QLabel *m_written = nullptr;
+    QLabel *m_received = nullptr;
     ConnectDialog *m_connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
+    Model4view *m_model;
 };
 
 #endif // MAINWINDOW_H
