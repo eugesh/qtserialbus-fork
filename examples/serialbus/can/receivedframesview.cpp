@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,68 +48,77 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "common.h"
+#include "receivedframesview.h"
 
-#include <QCanBusDevice>
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
+#include <QKeyEvent>
+#include <QMenu>
 
-#include <QMainWindow>
+ReceivedFramesView::ReceivedFramesView(QWidget *parent)
+ : QTableView(parent)
+{
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-class ConnectDialog;
-class ReceivedFramesModel;
-
-QT_BEGIN_NAMESPACE
-
-class QCanBusFrame;
-class QLabel;
-class QTimer;
-
-namespace Ui {
-class MainWindow;
+    connect(this, &QWidget::customContextMenuRequested,
+            this, &ReceivedFramesView::showContextMenu);
 }
 
-QT_END_NAMESPACE
+void ReceivedFramesView::setModel(QAbstractItemModel *model) {
+    QTableView::setModel(model);
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+    setColumnWidth(ReceivedFramesModelColumns::Number, 80);
+    setColumnWidth(ReceivedFramesModelColumns::Timestamp, 130);
+    setColumnWidth(ReceivedFramesModelColumns::Flags, 25);
+    setColumnWidth(ReceivedFramesModelColumns::CanID, 50);
+    setColumnWidth(ReceivedFramesModelColumns::DLC, 25);
+    setColumnWidth(ReceivedFramesModelColumns::Data, 200);
+}
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
+    if (event->matches(QKeySequence::Copy)) {
+        copyRow();
+    } else if (event->matches(QKeySequence::SelectAll)) {
+        selectAll();
+    } else {
+        QTableView::keyPressEvent(event);
+    }
+}
 
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void busStatus();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
-    void onAppendFramesTimeout();
-    void onReceiveActivitiyTimeout();
+void ReceivedFramesView::showContextMenu(const QPoint &pos) {
+    QMenu contextMenu(tr("Context menu"), this);
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
+    QAction action1("Copy", this);
+    QAction action2("Select all", this);
 
-private:
-    void initActionsConnections();
+    connect(&action1, &QAction::triggered, this, &ReceivedFramesView::copyRow);
+    connect(&action2, &QAction::triggered, this, &QAbstractItemView::selectAll);
 
-    qint64 m_numberFramesWritten = 0;
-    qint64 m_numberFramesReceived = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    QLabel *m_received = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_busStatusTimer = nullptr;
-    QTimer *m_appendTimer = nullptr;
-    ReceivedFramesModel *m_model = nullptr;
-    // Active session timer
-    QTimer *m_sessionTimer = nullptr;
-    static int constexpr activityTimeout = 1000; // [ms]
-    qint64 m_last_timestamp; // [s]
-};
+    if (selectedIndexes().count())
+        contextMenu.addAction(&action1);
+    contextMenu.addAction(&action2);
 
-#endif // MAINWINDOW_H
+    contextMenu.exec(mapToGlobal(pos));
+}
+
+void ReceivedFramesView::copyRow() {
+    QClipboard *clipboard = QApplication::clipboard();
+
+    const QModelIndexList ilist = selectedIndexes();
+
+    QString strRow;
+
+    for (const QModelIndex &index : ilist) {
+        if (index.column() == ReceivedFramesModelColumns::DLC)
+            strRow += "[" + index.data().toString() + "] ";
+        else
+            strRow += index.data().toString() + " ";
+
+        if (index.column() == model()->columnCount() - 1)
+            strRow += '\n';
+    }
+
+    clipboard->setText(strRow);
+}
