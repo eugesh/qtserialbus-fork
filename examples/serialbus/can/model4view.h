@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,61 +48,34 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MODEL4VIEW_H
+#define MODEL4VIEW_H
 
-#include <QCanBusDevice>
+#include <QAbstractTableModel>
+#include <QCanBusFrame>
+#include <QQueue>
 
-#include <QMainWindow>
-
-class ConnectDialog;
-
-QT_BEGIN_NAMESPACE
-
-class QCanBusFrame;
-class QLabel;
-class QTimer;
-class Model4view;
-
-namespace Ui {
-class MainWindow;
-}
-
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class Model4view : public QAbstractTableModel
 {
-    Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit Model4view(QObject *parent = nullptr);
+    ~Model4view() Q_DECL_OVERRIDE;
 
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void busStatus();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
-
-protected:
-    void closeEvent(QCloseEvent *event) override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+    void insertFrame(const QStringList & list);
+    int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    void removeFirstRow();
+    void deletAll();
+    void setQLimit(int limit) { m_qLimit = limit; }
+    int getQLimit() { return m_qLimit; }
 
 private:
-    void initActionsConnections();
-
-    qint64 m_numberFramesWritten = 0;
-    qint64 m_numberFramesReceived = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    QLabel *m_received = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_busStatusTimer = nullptr;
-    Model4view *m_model;
+    QQueue<QStringList> m_framesQ;
+    int m_qLimit = 5;
 };
 
-#endif // MAINWINDOW_H
+#endif // MODEL4VIEW_H

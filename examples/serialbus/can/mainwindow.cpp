@@ -51,12 +51,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "connectdialog.h"
+#include "model4view.h"
 
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QTimer>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -72,6 +74,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_written = new QLabel;
     m_ui->statusBar->addWidget(m_written);
+
+    m_received = new QLabel;
+    m_ui->statusBar->addWidget(m_received);
+
+    m_model = new Model4view(this);
+    m_ui->receivedMessagesView->setModel(m_model);
+    m_ui->receivedMessagesView->setColumnWidth(0, 150);
+    m_ui->receivedMessagesView->setColumnWidth(1, 25);
+    m_ui->receivedMessagesView->setColumnWidth(2, 250);
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
@@ -102,7 +113,7 @@ void MainWindow::initActionsConnections()
     });
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
-    connect(m_ui->actionClearLog, &QAction::triggered, m_ui->receivedMessagesEdit, &QTextEdit::clear);
+    connect(m_ui->actionClearLog, &QAction::triggered, m_model, &Model4view::deletAll);
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
     });
@@ -263,6 +274,7 @@ void MainWindow::processReceivedFrames()
         return;
 
     while (m_canDevice->framesAvailable()) {
+        m_numberFramesReceived++;
         const QCanBusFrame frame = m_canDevice->readFrame();
 
         QString view;
@@ -277,7 +289,8 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        m_ui->receivedMessagesEdit->append(time + flags + view);
+        m_model->insertFrame(QStringList() << time << flags << view);
+        m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }
 

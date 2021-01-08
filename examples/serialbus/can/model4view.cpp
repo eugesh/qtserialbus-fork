@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,61 +48,116 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "model4view.h"
 
-#include <QCanBusDevice>
+Model4view::Model4view(QObject *parent) : QAbstractTableModel (parent)
+{
 
-#include <QMainWindow>
-
-class ConnectDialog;
-
-QT_BEGIN_NAMESPACE
-
-class QCanBusFrame;
-class QLabel;
-class QTimer;
-class Model4view;
-
-namespace Ui {
-class MainWindow;
 }
 
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+Model4view::~Model4view()
 {
-    Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+}
 
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void busStatus();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
+bool Model4view::insertRows(int row, int count, const QModelIndex &parent)
+{
+    Q_UNUSED(parent)
+    Q_UNUSED(count)
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
+    beginInsertRows(parent, row, row);
 
-private:
-    void initActionsConnections();
+    endInsertRows();
 
-    qint64 m_numberFramesWritten = 0;
-    qint64 m_numberFramesReceived = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    QLabel *m_received = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_busStatusTimer = nullptr;
-    Model4view *m_model;
-};
+    return true;
+}
 
-#endif // MAINWINDOW_H
+bool Model4view::removeRows(int row, int count, const QModelIndex &parent)
+{
+    Q_UNUSED(parent)
+    Q_UNUSED(count)
+
+    beginRemoveRows(parent, row, row);
+
+    endRemoveRows();
+
+    return true;
+}
+
+QVariant Model4view::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if ((role == Qt::DisplayRole) && (orientation == Qt::Horizontal))
+    {
+        switch (section) {
+        case 0:
+            return "Timestamp";
+        case 1:
+            return "Flags";
+        case 2:
+            return "CAN-ID   DLC  Data";
+        }
+    }
+
+    return QVariant();
+}
+
+QVariant Model4view::data(const QModelIndex &index, int role) const
+{
+    if (! (role == Qt::DisplayRole || role == Qt::EditRole))
+        return QVariant();
+
+    int row = index.row();
+    int column = index.column();
+
+    switch (column) {
+    case 0:
+        return m_framesQ[row][0];
+    case 1:
+        return m_framesQ[row][1];
+    case 2:
+        return m_framesQ[row][2];
+    }
+
+    return QVariant();
+}
+
+int Model4view::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+
+    return m_framesQ.size();
+}
+
+int Model4view::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+
+    return 3;
+}
+
+void Model4view::insertFrame(const QStringList & list)
+{
+    insertRow(m_framesQ.size());
+
+    m_framesQ.enqueue(list);
+
+    if (m_qLimit < rowCount()) {
+        removeFirstRow();
+    }
+}
+
+void Model4view::removeFirstRow()
+{
+    if (rowCount()) {
+        removeRow(0);
+
+        m_framesQ.dequeue();
+    }
+}
+
+void Model4view::deletAll()
+{
+    while (rowCount()) {
+        removeFirstRow();
+    }
+}
