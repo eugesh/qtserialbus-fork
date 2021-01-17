@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 Evgeny Shtanov <shtanov_evgenii@mail.ru>
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,34 +48,41 @@
 **
 ****************************************************************************/
 
-#ifndef MODEL4VIEW_H
-#define MODEL4VIEW_H
+#ifndef RECEIVEDFRAMESMODEL_H
+#define RECEIVEDFRAMESMODEL_H
 
 #include <QAbstractTableModel>
 #include <QCanBusFrame>
 #include <QQueue>
 
-class Model4view : public QAbstractTableModel
+enum ReceivedFramesModelColumns {
+    Timestamp = 0,
+    Flags,
+    CanID,
+    DLC,
+    Data
+};
+
+class ReceivedFramesModel : public QAbstractTableModel
 {
 public:
-    explicit Model4view(QObject *parent = nullptr);
-    ~Model4view() Q_DECL_OVERRIDE;
+    explicit ReceivedFramesModel(QObject *parent = nullptr);
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const Q_DECL_OVERRIDE;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
-    void insertFrame(const QStringList & list);
-    int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    void appendFrame(const QStringList & list);
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     void removeFirstRow();
-    void deletAll();
-    void setQLimit(int limit) { m_qLimit = limit; }
-    int getQLimit() { return m_qLimit; }
+    void clear();
+    void setQueueLimit(int limit) { m_qLimit = limit; }
+    int getQueueLimit() { return m_qLimit; }
 
 private:
-    QQueue<QStringList> m_framesQ;
+    QQueue<QStringList> m_framesQueue;
     int m_qLimit = 5;
 };
 
-#endif // MODEL4VIEW_H
+#endif // RECEIVEDFRAMESMODEL_H

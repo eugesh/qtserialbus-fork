@@ -56,13 +56,13 @@
 #include <QMainWindow>
 
 class ConnectDialog;
+class ReceivedFramesModel;
 
 QT_BEGIN_NAMESPACE
 
 class QCanBusFrame;
 class QLabel;
 class QTimer;
-class Model4view;
 
 namespace Ui {
 class MainWindow;
@@ -76,7 +76,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
 private slots:
     void processReceivedFrames();
@@ -102,7 +102,7 @@ private:
     ConnectDialog *m_connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
-    Model4view *m_model;
+    ReceivedFramesModel *m_model = nullptr;
 };
 
 #endif // MAINWINDOW_H
