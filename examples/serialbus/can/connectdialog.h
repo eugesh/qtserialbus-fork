@@ -79,7 +79,7 @@ public:
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);
-    ~ConnectDialog();
+    ~ConnectDialog() override;
 
     Settings settings() const;
 

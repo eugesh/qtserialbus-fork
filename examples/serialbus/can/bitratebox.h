@@ -61,7 +61,7 @@ class BitRateBox : public QComboBox
 {
 public:
     explicit BitRateBox(QWidget *parent = nullptr);
-    ~BitRateBox();
+    ~BitRateBox() override;
 
     int bitRate() const;
 

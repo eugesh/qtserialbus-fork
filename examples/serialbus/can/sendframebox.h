@@ -68,7 +68,7 @@ class HexIntegerValidator : public QValidator
 public:
     explicit HexIntegerValidator(QObject *parent = nullptr);
 
-    QValidator::State validate(QString &input, int &) const;
+    QValidator::State validate(QString &input, int &) const override;
 
     void setMaximum(uint maximum);
 
@@ -83,7 +83,7 @@ class HexStringValidator : public QValidator
 public:
     explicit HexStringValidator(QObject *parent = nullptr);
 
-    QValidator::State validate(QString &input, int &pos) const;
+    QValidator::State validate(QString &input, int &pos) const override;
 
     void setMaxLength(int maxLength);
 
@@ -97,7 +97,7 @@ class SendFrameBox : public QGroupBox
 
 public:
     explicit SendFrameBox(QWidget *parent = nullptr);
-    ~SendFrameBox();
+    ~SendFrameBox() override;
 
 signals:
     void sendFrame(const QCanBusFrame &frame);

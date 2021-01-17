@@ -9,15 +9,15 @@ SOURCES += \
     connectdialog.cpp \
     main.cpp \
     mainwindow.cpp \
-    sendframebox.cpp \
-    model4view.cpp
+    receivedframesmodel.cpp \
+    sendframebox.cpp
 
 HEADERS += \
     bitratebox.h \
     connectdialog.h \
     mainwindow.h \
-    sendframebox.h \
-    model4view.h
+    receivedframesmodel.h \
+    sendframebox.h
 
 FORMS   += mainwindow.ui \
     connectdialog.ui \
