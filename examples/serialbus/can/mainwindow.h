@@ -55,6 +55,8 @@
 
 #include <QMainWindow>
 
+#include <memory>
+
 class ConnectDialog;
 class ReceivedFramesModel;
 
@@ -86,6 +88,8 @@ private slots:
     void busStatus();
     void disconnectDevice();
     void processFramesWritten(qint64);
+    void onScrollToBottomTimeout();
+    void onAppendFramesTimeout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -102,7 +106,10 @@ private:
     ConnectDialog *m_connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
+    QTimer *m_scrollTimer;
+    QTimer *m_appentTimer;
     ReceivedFramesModel *m_model = nullptr;
+    QVector<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
 };
 
 #endif // MAINWINDOW_H

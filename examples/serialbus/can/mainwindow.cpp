@@ -88,6 +88,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
+    /*m_scrollTimer = new QTimer;
+    connect(m_scrollTimer, &QTimer::timeout, this, &MainWindow::onScrollToBottomTimeout);
+    m_scrollTimer->start(50);*/
+    m_appentTimer = new QTimer;
+    connect(m_appentTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
+    m_appentTimer->start(250);
 }
 
 MainWindow::~MainWindow()
@@ -289,7 +295,8 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        m_model->appendFrame(QStringList({time, flags, view}));
+        //m_model->appendFrame(QStringList({time, flags, view}));
+        m_framesAccumulator << QStringList({time, flags, view});
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }
@@ -300,4 +307,18 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
         return;
 
     m_canDevice->writeFrame(frame);
+}
+
+void MainWindow::onScrollToBottomTimeout()
+{
+    m_ui->receivedFramesView->scrollToBottom();
+}
+
+void MainWindow::onAppendFramesTimeout()
+{
+    if (m_framesAccumulator.count()) {
+        m_model->appendFrames(m_framesAccumulator);
+        m_framesAccumulator.clear();
+        m_ui->receivedFramesView->scrollToBottom();
+    }
 }

@@ -47,7 +47,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
+#include <iterator>
 #include "receivedframesmodel.h"
 
 static const unsigned int ColumnCount = 3;
@@ -62,7 +62,14 @@ bool ReceivedFramesModel::insertRows(int row, int count, const QModelIndex &pare
     Q_UNUSED(parent)
     Q_UNUSED(count)
 
-    beginInsertRows(parent, row, row);
+    if (m_queueLimit <= (rowCount() + count))
+        removeFirstNRows(rowCount() + count - m_queueLimit + 1);
+
+    beginInsertRows(parent, row, row + count - 1);
+
+    for (int i = 0; i < m_framesToInsert.size(); ++i) {
+        m_framesQueue.enqueue(m_framesToInsert[i]);
+    }
 
     endInsertRows();
 
@@ -74,7 +81,15 @@ bool ReceivedFramesModel::removeRows(int row, int count, const QModelIndex &pare
     Q_UNUSED(parent)
     Q_UNUSED(count)
 
-    beginRemoveRows(parent, row, row);
+    beginRemoveRows(parent, row, row + count - 1);
+
+    if (count <= rowCount()) {
+        // removeFirstNRows(count);
+        // for (int i = 0; i < count; ++i)
+        QList<QStringList>::iterator i_start = m_framesQueue.begin() + row;
+        QList<QStringList>::iterator i_end = i_start + count;
+        m_framesQueue.erase(i_start, i_end);
+    }
 
     endRemoveRows();
 
@@ -125,27 +140,53 @@ int ReceivedFramesModel::columnCount(const QModelIndex &parent) const
     return ColumnCount;
 }
 
-void ReceivedFramesModel::appendFrame(const QStringList &list)
+void ReceivedFramesModel::appendFrame(const QStringList &slist)
 {
-    if (m_qLimit <= rowCount())
-        removeFirstRow();
+    m_framesToInsert = {slist};
 
     insertRow(m_framesQueue.size());
+}
 
-    m_framesQueue.enqueue(list);
+void ReceivedFramesModel::appendFrames(const QVector<QStringList> &slvector)
+{
+    /*if (m_qLimit <= rowCount())
+        removeFirstRow();*/
+    m_framesToInsert = slvector;
+
+    insertRows(m_framesQueue.size(), slvector.size());
+
+    /*for (int i = 0; i < slvector.size(); ++i) {
+        m_framesQueue.enqueue(slvector[i]);
+    }*/
 }
 
 void ReceivedFramesModel::removeFirstRow()
 {
     if (rowCount()) {
-        removeRow(0);
+        //removeRow(0);
+        beginRemoveRows(QModelIndex(), 0, 1);
 
         m_framesQueue.dequeue();
+
+        endRemoveRows();
+    }
+}
+
+void ReceivedFramesModel::removeFirstNRows(int N) {
+    if (rowCount() >= N) {
+        beginRemoveRows(QModelIndex(), 0, N - 1);
+
+        QList<QStringList>::iterator i_start = m_framesQueue.begin();
+        QList<QStringList>::iterator i_end = i_start + N;
+        m_framesQueue.erase(i_start, i_end);
+
+        endRemoveRows();
     }
 }
 
 void ReceivedFramesModel::clear()
 {
-    while (rowCount())
-        removeFirstRow();
+    // while (rowCount())
+       // removeFirstRow();
+    removeFirstNRows(m_framesQueue.size());
 }
