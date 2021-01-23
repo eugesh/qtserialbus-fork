@@ -76,8 +76,6 @@ public:
     void appendFrames(const QVector<QStringList> & slvector);
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    void removeFirstRow();
-    void removeFirstNRows(int N);
     void clear();
     void setQueueLimit(int limit) { m_queueLimit = limit; }
     int getQueueLimit() { return m_queueLimit; }

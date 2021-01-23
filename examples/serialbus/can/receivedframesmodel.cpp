@@ -63,7 +63,7 @@ bool ReceivedFramesModel::insertRows(int row, int count, const QModelIndex &pare
     Q_UNUSED(count)
 
     if (m_queueLimit <= (rowCount() + count))
-        removeFirstNRows(rowCount() + count - m_queueLimit + 1);
+        removeRows(0, rowCount() + count - m_queueLimit + 1);
 
     beginInsertRows(parent, row, row + count - 1);
 
@@ -81,15 +81,15 @@ bool ReceivedFramesModel::removeRows(int row, int count, const QModelIndex &pare
     Q_UNUSED(parent)
     Q_UNUSED(count)
 
-    beginRemoveRows(parent, row, row + count - 1);
-
     if (count <= rowCount()) {
+        beginRemoveRows(parent, row, row + count - 1);
+
         QList<QStringList>::iterator i_start = m_framesQueue.begin() + row;
         QList<QStringList>::iterator i_end = i_start + count;
         m_framesQueue.erase(i_start, i_end);
-    }
 
-    endRemoveRows();
+        endRemoveRows();
+    }
 
     return true;
 }
@@ -152,30 +152,7 @@ void ReceivedFramesModel::appendFrames(const QVector<QStringList> &slvector)
     insertRows(m_framesQueue.size(), slvector.size());
 }
 
-void ReceivedFramesModel::removeFirstRow()
-{
-    if (rowCount()) {
-        beginRemoveRows(QModelIndex(), 0, 1);
-
-        m_framesQueue.dequeue();
-
-        endRemoveRows();
-    }
-}
-
-void ReceivedFramesModel::removeFirstNRows(int N) {
-    if (rowCount() >= N) {
-        beginRemoveRows(QModelIndex(), 0, N - 1);
-
-        QList<QStringList>::iterator i_start = m_framesQueue.begin();
-        QList<QStringList>::iterator i_end = i_start + N;
-        m_framesQueue.erase(i_start, i_end);
-
-        endRemoveRows();
-    }
-}
-
 void ReceivedFramesModel::clear()
 {
-    removeFirstNRows(m_framesQueue.size());
+    removeRows(0, m_framesQueue.size());
 }
