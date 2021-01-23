@@ -293,7 +293,6 @@ void MainWindow::processReceivedFrames()
         const QString flags = frameFlags(frame);
 
         m_framesAccumulator << QStringList({time, flags, view});
-        m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }
 
@@ -311,5 +310,6 @@ void MainWindow::onAppendFramesTimeout()
         m_model->appendFrames(m_framesAccumulator);
         m_framesAccumulator.clear();
         m_ui->receivedFramesView->scrollToBottom();
+        m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }
