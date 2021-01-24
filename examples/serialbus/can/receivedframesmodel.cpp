@@ -50,46 +50,22 @@
 #include <iterator>
 #include "receivedframesmodel.h"
 
-static const unsigned int ColumnCount = 3;
+static constexpr int ColumnCount = 3;
 
 ReceivedFramesModel::ReceivedFramesModel(QObject *parent) : QAbstractTableModel(parent)
 {
 
 }
 
-bool ReceivedFramesModel::insertRows(int row, int count, const QModelIndex &parent)
-{
-    Q_UNUSED(parent)
-    Q_UNUSED(count)
-
-    if (m_queueLimit <= (rowCount() + count))
-        removeRows(0, rowCount() + count - m_queueLimit + 1);
-
-    beginInsertRows(parent, row, row + count - 1);
-
-    for (int i = 0; i < m_framesToInsert.size(); ++i) {
-        m_framesQueue.enqueue(m_framesToInsert[i]);
-    }
-
-    endInsertRows();
-
-    return true;
-}
-
 bool ReceivedFramesModel::removeRows(int row, int count, const QModelIndex &parent)
 {
-    Q_UNUSED(parent)
-    Q_UNUSED(count)
+    beginRemoveRows(parent, row, row + count - 1);
 
-    if (count <= rowCount()) {
-        beginRemoveRows(parent, row, row + count - 1);
+    QList<QStringList>::iterator i_start = m_framesQueue.begin() + row;
+    QList<QStringList>::iterator i_end = i_start + count;
+    m_framesQueue.erase(i_start, i_end);
 
-        QList<QStringList>::iterator i_start = m_framesQueue.begin() + row;
-        QList<QStringList>::iterator i_end = i_start + count;
-        m_framesQueue.erase(i_start, i_end);
-
-        endRemoveRows();
-    }
+    endRemoveRows();
 
     return true;
 }
@@ -118,41 +94,58 @@ QVariant ReceivedFramesModel::data(const QModelIndex &index, int role) const
     const int row = index.row();
     const int column = index.column();
 
-    if (column < columnCount() && row < rowCount())
-        return m_framesQueue.at(row).at(column);
-
-    return {};
+    return m_framesQueue.at(row).at(column);
 }
 
 int ReceivedFramesModel::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent)
-
-    return m_framesQueue.size();
+    return parent.isValid() ? 0 : m_framesQueue.size();
 }
 
 int ReceivedFramesModel::columnCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent)
-
-    return ColumnCount;
+    return parent.isValid() ? 0 : ColumnCount;
 }
 
 void ReceivedFramesModel::appendFrame(const QStringList &slist)
 {
-    m_framesToInsert = {slist};
-
-    insertRow(m_framesQueue.size());
+    appendFrames({slist});
 }
 
-void ReceivedFramesModel::appendFrames(const QVector<QStringList> &slvector)
+void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
 {
-    m_framesToInsert = slvector;
+    if (m_queueLimit <= (rowCount() + slvector.size())) {
+        if (slvector.size() < m_queueLimit)
+            removeRows(0, rowCount() + slvector.size() - m_queueLimit + 1);
+        else
+            clear();
+    }
 
-    insertRows(m_framesQueue.size(), slvector.size());
+    beginInsertRows(QModelIndex(), rowCount(), rowCount() + slvector.size() - 1);
+
+    if (slvector.size() < m_queueLimit)
+        m_framesQueue.append(slvector);
+    else
+        m_framesQueue.append(slvector.mid(rowCount() - m_queueLimit));
+
+    endInsertRows();
 }
 
 void ReceivedFramesModel::clear()
 {
-    removeRows(0, m_framesQueue.size());
+    if (m_framesQueue.count()) {
+        beginResetModel();
+
+        m_framesQueue.clear();
+
+        endResetModel();
+    }
+}
+
+void ReceivedFramesModel::setQueueLimit(int limit)
+{
+    m_queueLimit = limit;
+
+    if (Q_UNLIKELY(m_framesQueue.size() > limit))
+        removeRows(0, m_framesQueue.size() - limit);
 }

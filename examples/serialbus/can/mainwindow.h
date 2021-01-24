@@ -105,9 +105,9 @@ private:
     ConnectDialog *m_connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
-    QTimer *m_appentTimer;
+    QTimer *m_appendTimer;
     ReceivedFramesModel *m_model = nullptr;
-    QVector<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
+    QList<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
 };
 
 #endif // MAINWINDOW_H

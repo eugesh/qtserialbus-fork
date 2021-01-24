@@ -80,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_model = new ReceivedFramesModel(this);
     m_ui->receivedFramesView->setModel(m_model);
+    m_model->setQueueLimit(1000);
+    // m_ui->receivedFramesView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     m_ui->receivedFramesView->setColumnWidth(0, 150);
     m_ui->receivedFramesView->setColumnWidth(1, 25);
     m_ui->receivedFramesView->setColumnWidth(2, 250);
@@ -88,9 +90,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
-    m_appentTimer = new QTimer;
-    connect(m_appentTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
-    m_appentTimer->start(250);
+    m_appendTimer = new QTimer;
+    connect(m_appendTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
+    m_appendTimer->start(150);
 }
 
 MainWindow::~MainWindow()
@@ -309,7 +311,7 @@ void MainWindow::onAppendFramesTimeout()
     if (m_framesAccumulator.count()) {
         m_model->appendFrames(m_framesAccumulator);
         m_framesAccumulator.clear();
-        m_ui->receivedFramesView->scrollToBottom();
+        //m_ui->receivedFramesView->scrollToBottom();
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }
