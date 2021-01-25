@@ -56,7 +56,8 @@
 #include <QQueue>
 
 enum ReceivedFramesModelColumns {
-    Timestamp = 0,
+    Number = 0,
+    Timestamp,
     Flags,
     CanID,
     DLC,

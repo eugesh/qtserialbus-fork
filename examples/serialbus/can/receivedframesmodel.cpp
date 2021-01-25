@@ -50,7 +50,7 @@
 #include <iterator>
 #include "receivedframesmodel.h"
 
-static constexpr int ColumnCount = 3;
+static constexpr int ColumnCount = 4;
 
 ReceivedFramesModel::ReceivedFramesModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -74,6 +74,8 @@ QVariant ReceivedFramesModel::headerData(int section, Qt::Orientation orientatio
 {
     if ((role == Qt::DisplayRole) && (orientation == Qt::Horizontal)) {
         switch (section) {
+        case Number:
+            return tr("#");
         case Timestamp:
             return tr("Timestamp");
         case Flags:

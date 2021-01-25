@@ -82,9 +82,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->receivedFramesView->setModel(m_model);
     m_model->setQueueLimit(1000);
     // m_ui->receivedFramesView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    m_ui->receivedFramesView->setColumnWidth(0, 150);
-    m_ui->receivedFramesView->setColumnWidth(1, 25);
-    m_ui->receivedFramesView->setColumnWidth(2, 250);
+    m_ui->receivedFramesView->setColumnWidth(0, 80);
+    m_ui->receivedFramesView->setColumnWidth(1, 150);
+    m_ui->receivedFramesView->setColumnWidth(2, 25);
+    m_ui->receivedFramesView->setColumnWidth(3, 250);
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
@@ -294,7 +295,7 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        m_framesAccumulator << QStringList({time, flags, view});
+        m_framesAccumulator << QStringList({QString::number(m_numberFramesReceived), time, flags, view});
     }
 }
 
