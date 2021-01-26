@@ -85,7 +85,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->receivedFramesView->setColumnWidth(0, 80);
     m_ui->receivedFramesView->setColumnWidth(1, 150);
     m_ui->receivedFramesView->setColumnWidth(2, 25);
-    m_ui->receivedFramesView->setColumnWidth(3, 250);
+    m_ui->receivedFramesView->setColumnWidth(3, 50);
+    m_ui->receivedFramesView->setColumnWidth(4, 25);
+    m_ui->receivedFramesView->setColumnWidth(5, 175);
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
@@ -283,11 +285,12 @@ void MainWindow::processReceivedFrames()
         m_numberFramesReceived++;
         const QCanBusFrame frame = m_canDevice->readFrame();
 
-        QString view;
-        if (frame.frameType() == QCanBusFrame::ErrorFrame)
-            view = m_canDevice->interpretErrorFrame(frame);
-        else
-            view = frame.toString();
+        QString data;
+        if (frame.frameType() == QCanBusFrame::ErrorFrame) {
+            data = m_canDevice->interpretErrorFrame(frame);
+        } else {
+            data = QLatin1String(frame.payload().toHex(' ').toUpper());
+        }
 
         const QString time = QString::fromLatin1("%1.%2  ")
                 .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
@@ -295,7 +298,16 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        m_framesAccumulator << QStringList({QString::number(m_numberFramesReceived), time, flags, view});
+        const char * const idFormat = frame.hasExtendedFrameFormat() ? "%08X" : "     %03X";
+        const char * const dlcFormat = frame.hasFlexibleDataRateFormat() ? "  %02d" : "   %d";
+        QString::asprintf(idFormat, static_cast<uint>(frame.frameId()));
+        QString::asprintf(dlcFormat, frame.payload().size());
+
+        m_framesAccumulator <<
+           QStringList({QString::number(m_numberFramesReceived), time, flags,
+                        QString::asprintf(idFormat, static_cast<uint>(frame.frameId())),
+                        QString::asprintf(dlcFormat, frame.payload().size()),
+                        data});
     }
 }
 

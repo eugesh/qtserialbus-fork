@@ -47,10 +47,11 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+
 #include <iterator>
 #include "receivedframesmodel.h"
 
-static constexpr int ColumnCount = 4;
+static constexpr int ColumnCount = 6;
 
 ReceivedFramesModel::ReceivedFramesModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -81,7 +82,11 @@ QVariant ReceivedFramesModel::headerData(int section, Qt::Orientation orientatio
         case Flags:
             return tr("Flags");
         case CanID:
-            return tr("CAN-ID   DLC  Data");
+            return tr("CAN-ID");
+        case DLC:
+            return tr("DLC");
+        case Data:
+            return tr("Data");
         }
     }
 
