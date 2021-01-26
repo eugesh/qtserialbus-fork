@@ -300,14 +300,11 @@ void MainWindow::processReceivedFrames()
 
         const char * const idFormat = frame.hasExtendedFrameFormat() ? "%08X" : "     %03X";
         const char * const dlcFormat = frame.hasFlexibleDataRateFormat() ? "  %02d" : "   %d";
-        QString::asprintf(idFormat, static_cast<uint>(frame.frameId()));
-        QString::asprintf(dlcFormat, frame.payload().size());
+        const QString id = QString::asprintf(idFormat, static_cast<uint>(frame.frameId()));
+        const QString dlc = QString::asprintf(dlcFormat, frame.payload().size());
 
         m_framesAccumulator <<
-           QStringList({QString::number(m_numberFramesReceived), time, flags,
-                        QString::asprintf(idFormat, static_cast<uint>(frame.frameId())),
-                        QString::asprintf(dlcFormat, frame.payload().size()),
-                        data});
+           QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data});
     }
 }
 
