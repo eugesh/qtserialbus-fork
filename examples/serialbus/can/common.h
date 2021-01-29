@@ -48,36 +48,17 @@
 **
 ****************************************************************************/
 
-#ifndef RECEIVEDFRAMESMODEL_H
-#define RECEIVEDFRAMESMODEL_H
+#ifndef COMMON_H
+#define COMMON_H
 
-#include <QAbstractTableModel>
-#include <QCanBusFrame>
-#include <QQueue>
-
-#include "common.h"
-
-class ReceivedFramesModel : public QAbstractTableModel
-{
-public:
-    explicit ReceivedFramesModel(QObject *parent = nullptr);
-
-    void appendFrame(const QStringList & slist);
-    void appendFrames(const QList<QStringList> & slvector);
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    void clear();
-    void setQueueLimit(int limit);
-    int getQueueLimit() { return m_queueLimit; }
-
-protected:
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-
-private:
-    QQueue<QStringList> m_framesQueue;
-    int m_queueLimit = 100;
+enum ReceivedFramesModelColumns {
+    Number = 0,
+    Timestamp,
+    Flags,
+    CanID,
+    DLC,
+    Data
 };
 
-#endif // RECEIVEDFRAMESMODEL_H
+
+#endif // COMMON_H

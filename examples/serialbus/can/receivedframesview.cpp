@@ -48,36 +48,49 @@
 **
 ****************************************************************************/
 
-#ifndef RECEIVEDFRAMESMODEL_H
-#define RECEIVEDFRAMESMODEL_H
-
-#include <QAbstractTableModel>
-#include <QCanBusFrame>
-#include <QQueue>
-
+#include <QClipboard>
+#include <QKeyEvent>
+#include <QApplication>
 #include "common.h"
+#include "receivedframesview.h"
 
-class ReceivedFramesModel : public QAbstractTableModel
+ReceivedFramesView::ReceivedFramesView(QWidget *parent)
+ : QTableView(parent)
 {
-public:
-    explicit ReceivedFramesModel(QObject *parent = nullptr);
+    setColumnWidth(0, 80);
+    setColumnWidth(1, 150);
+    setColumnWidth(2, 25);
+    setColumnWidth(3, 50);
+    setColumnWidth(4, 25);
+    setColumnWidth(5, 175);
+}
 
-    void appendFrame(const QStringList & slist);
-    void appendFrames(const QList<QStringList> & slvector);
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    void clear();
-    void setQueueLimit(int limit);
-    int getQueueLimit() { return m_queueLimit; }
+void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
+    if (event->matches(QKeySequence::Copy)) {
+        copyRow();
+    } else if (event->matches(QKeySequence::SelectAll)) {
+        selectAll();
+    }
+}
 
-protected:
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+void ReceivedFramesView::copyRow() {
+    QClipboard *clipboard = QApplication::clipboard();
 
-private:
-    QQueue<QStringList> m_framesQueue;
-    int m_queueLimit = 100;
-};
+    const QModelIndexList ilist = selectedIndexes();
 
-#endif // RECEIVEDFRAMESMODEL_H
+    QString strRow = "";
+
+    foreach (const QModelIndex ind, ilist) {
+        if (ind.column() == ReceivedFramesModelColumns::DLC)
+            strRow += "[" + ind.data().toString() + "] ";
+        else
+            strRow += ind.data().toString() + " ";
+
+        if (ind.column() == model()->columnCount() - 1)
+            strRow += '\n';
+    }
+
+    clipboard->setText(strRow);
+
+    QString tmp_str = clipboard->text();
+}

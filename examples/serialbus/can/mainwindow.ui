@@ -29,7 +29,20 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QTableView" name="receivedFramesView"/>
+        <widget class="ReceivedFramesView" name="receivedFramesView">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="showDropIndicator" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="dragDropOverwriteMode">
+          <bool>false</bool>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="busStatus">
@@ -153,6 +166,11 @@
    <extends>QGroupBox</extends>
    <header location="global">sendframebox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ReceivedFramesView</class>
+   <extends>QTableView</extends>
+   <header location="global">receivedframesview.h</header>
   </customwidget>
  </customwidgets>
  <resources>

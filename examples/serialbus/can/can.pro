@@ -10,13 +10,16 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     receivedframesmodel.cpp \
+    receivedframesview.cpp \
     sendframebox.cpp
 
 HEADERS += \
     bitratebox.h \
+    common.h \
     connectdialog.h \
     mainwindow.h \
     receivedframesmodel.h \
+    receivedframesview.h \
     sendframebox.h
 
 FORMS   += mainwindow.ui \
