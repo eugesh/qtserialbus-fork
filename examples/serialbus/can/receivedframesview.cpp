@@ -48,11 +48,12 @@
 **
 ****************************************************************************/
 
-#include <QClipboard>
-#include <QKeyEvent>
-#include <QApplication>
 #include "common.h"
 #include "receivedframesview.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QKeyEvent>
 
 ReceivedFramesView::ReceivedFramesView(QWidget *parent)
  : QTableView(parent)
@@ -63,12 +64,12 @@ ReceivedFramesView::ReceivedFramesView(QWidget *parent)
 void ReceivedFramesView::setModel(QAbstractItemModel *model) {
     QTableView::setModel(model);
 
-    setColumnWidth(0, 80);
-    setColumnWidth(1, 150);
-    setColumnWidth(2, 25);
-    setColumnWidth(3, 50);
-    setColumnWidth(4, 25);
-    setColumnWidth(5, 175);
+    setColumnWidth(ReceivedFramesModelColumns::Number, 80);
+    setColumnWidth(ReceivedFramesModelColumns::Timestamp, 130);
+    setColumnWidth(ReceivedFramesModelColumns::Flags, 25);
+    setColumnWidth(ReceivedFramesModelColumns::CanID, 50);
+    setColumnWidth(ReceivedFramesModelColumns::DLC, 25);
+    setColumnWidth(ReceivedFramesModelColumns::Data, 200);
 }
 
 void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
@@ -76,6 +77,8 @@ void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
         copyRow();
     } else if (event->matches(QKeySequence::SelectAll)) {
         selectAll();
+    } else {
+        QTableView::keyPressEvent(event);
     }
 }
 

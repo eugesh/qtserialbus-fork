@@ -315,7 +315,7 @@ void MainWindow::onAppendFramesTimeout()
     if (m_framesAccumulator.count()) {
         m_model->appendFrames(m_framesAccumulator);
         m_framesAccumulator.clear();
-        //m_ui->receivedFramesView->scrollToBottom();
+        m_ui->receivedFramesView->scrollToBottom();
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }
