@@ -58,6 +58,7 @@ class ReceivedFramesView : public QTableView
 {
 public:
     ReceivedFramesView(QWidget *parent = nullptr);
+    void setModel(QAbstractItemModel *model) override;
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

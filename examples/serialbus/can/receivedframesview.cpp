@@ -57,6 +57,12 @@
 ReceivedFramesView::ReceivedFramesView(QWidget *parent)
  : QTableView(parent)
 {
+
+}
+
+void ReceivedFramesView::setModel(QAbstractItemModel *model) {
+    QTableView::setModel(model);
+
     setColumnWidth(0, 80);
     setColumnWidth(1, 150);
     setColumnWidth(2, 25);
