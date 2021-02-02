@@ -153,6 +153,6 @@ void ReceivedFramesModel::setQueueLimit(int limit)
 {
     m_queueLimit = limit;
 
-    if (Q_UNLIKELY(m_framesQueue.size() > limit))
+    if (m_framesQueue.size() > limit)
         removeRows(0, m_framesQueue.size() - limit);
 }

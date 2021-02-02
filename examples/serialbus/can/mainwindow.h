@@ -89,6 +89,7 @@ private slots:
     void disconnectDevice();
     void processFramesWritten(qint64);
     void onAppendFramesTimeout();
+    void onActivitiyTimeout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -107,7 +108,11 @@ private:
     QTimer *m_busStatusTimer = nullptr;
     QTimer *m_appendTimer = nullptr;
     ReceivedFramesModel *m_model = nullptr;
-    QList<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
+    QList<QStringList> m_framesAccumulator; // Temporary variable to insert frames data. To do: move to model.
+    // Active session timer
+    QTimer *m_sessionTimer = nullptr;
+    static int constexpr activityTimeout = 1000; // [ms]
+    qint64 m_last_timestamp; // [ms]
 };
 
 #endif // MAINWINDOW_H

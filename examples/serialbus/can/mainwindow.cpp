@@ -56,6 +56,7 @@
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QCloseEvent>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QLabel>
 #include <QTimer>
@@ -90,6 +91,11 @@ MainWindow::MainWindow(QWidget *parent) :
     m_appendTimer = new QTimer;
     connect(m_appendTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
     m_appendTimer->start(150);
+
+    // Activity check
+    m_sessionTimer = new QTimer;
+    connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onActivitiyTimeout);
+    m_ui->activeSessionLabel->setText("0");
 }
 
 MainWindow::~MainWindow()
@@ -299,7 +305,12 @@ void MainWindow::processReceivedFrames()
 
         m_framesAccumulator <<
            QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data});
+
+        m_last_timestamp = frame.timeStamp().seconds();
     }
+
+    if (!m_sessionTimer->isActive())
+        m_sessionTimer->start(activityTimeout);
 }
 
 void MainWindow::sendFrame(const QCanBusFrame &frame) const
@@ -318,4 +329,15 @@ void MainWindow::onAppendFramesTimeout()
         m_ui->receivedFramesView->scrollToBottom();
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
+}
+
+void MainWindow::onActivitiyTimeout() {
+    static qint64 time = 0;
+    const qint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
+
+    if (qAbs(timeStamp - m_last_timestamp) > activityTimeout) {
+        m_sessionTimer->stop();
+    }
+    time++; // += static_cast<double>(activityTimeout) / 1000.0;
+    m_ui->activeSessionLabel->setText(QString::number(time));
 }
