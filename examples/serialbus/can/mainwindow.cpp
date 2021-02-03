@@ -95,7 +95,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // Activity check
     m_sessionTimer = new QTimer;
     connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onActivitiyTimeout);
-    m_ui->activeSessionLabel->setText("0");
+    m_ui->activeSessionLabel->setText("Time spent: ");
+    m_ui->activeSessionTime->setText("0");
 }
 
 MainWindow::~MainWindow()
@@ -339,5 +340,5 @@ void MainWindow::onActivitiyTimeout() {
         m_sessionTimer->stop();
     }
     time++; // += static_cast<double>(activityTimeout) / 1000.0;
-    m_ui->activeSessionLabel->setText(QString::number(time));
+    m_ui->activeSessionTime->setText(QString::number(time));
 }
