@@ -55,8 +55,6 @@
 
 #include <QMainWindow>
 
-#include <memory>
-
 class ConnectDialog;
 class ReceivedFramesModel;
 
@@ -89,7 +87,7 @@ private slots:
     void disconnectDevice();
     void processFramesWritten(qint64);
     void onAppendFramesTimeout();
-    void onActivitiyTimeout();
+    void onReceiveActivitiyTimeout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -112,7 +110,7 @@ private:
     // Active session timer
     QTimer *m_sessionTimer = nullptr;
     static int constexpr activityTimeout = 1000; // [ms]
-    qint64 m_last_timestamp; // [ms]
+    qint64 m_last_timestamp; // [s]
     // Bitrate indicator
     double m_bytesCounter = 0.0;
 };

@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Activity check
     m_sessionTimer = new QTimer;
-    connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onActivitiyTimeout);
+    connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onReceiveActivitiyTimeout);
     m_ui->activeSessionLabel->setText("Time spent: ");
     m_ui->activeSessionTime->setText("0 s, ");
     m_ui->bitrateIndicator->setText("0 kbit/s");
@@ -293,11 +293,10 @@ void MainWindow::processReceivedFrames()
         const QCanBusFrame frame = m_canDevice->readFrame();
 
         QString data;
-        if (frame.frameType() == QCanBusFrame::ErrorFrame) {
+        if (frame.frameType() == QCanBusFrame::ErrorFrame)
             data = m_canDevice->interpretErrorFrame(frame);
-        } else {
+        else
             data = QLatin1String(frame.payload().toHex(' ').toUpper());
-        }
 
         const QString time = QString::fromLatin1("%1.%2  ")
                 .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
@@ -339,9 +338,9 @@ void MainWindow::onAppendFramesTimeout()
     }
 }
 
-void MainWindow::onActivitiyTimeout() {
+void MainWindow::onReceiveActivitiyTimeout() {
     static qint64 time = 0;
-    const qint64 timeStamp = QDateTime::currentDateTime().toSecsSinceEpoch();
+    const qint64 timeStamp = QDateTime::currentDateTime().toSecsSinceEpoch(); // Change QDateTime to system call?
 
     if (qAbs(timeStamp - m_last_timestamp) > 1) {
         m_sessionTimer->stop();
