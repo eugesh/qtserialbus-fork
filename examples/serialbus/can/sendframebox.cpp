@@ -112,13 +112,26 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // insert a space after every two hex nibbles
-    const QRegularExpression insertSpace(QStringLiteral("(?:[[:xdigit:]]{2} )*[[:xdigit:]]{3}"));
+    // const QRegularExpression insertSpace(QStringLiteral("(?:[[:xdigit:]]{2} )*[[:xdigit:]]{3}"));
     const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
-    while (threeDigits.match(input).hasMatch()) {
-        QRegularExpressionMatch match = threeDigits.match(input);
-        //int end = match.capturedEnd();
-        input.insert(match.capturedEnd() - 1, space);
-        pos = input.size();
+    //const QRegularExpression digitSpaceDigit(QStringLiteral("\\s*[[:xdigit:]]{1}\\s+[[:xdigit:]]{1}"));
+
+    while (threeDigits.match(input).hasMatch() /*|| digitSpaceDigit.match(input).hasMatch()*/) {
+        if (threeDigits.match(input).hasMatch()) {
+            QRegularExpressionMatch match = threeDigits.match(input);
+            //int end = match.capturedEnd();
+            input.insert(match.capturedEnd() - 1, space);
+            //pos = input.size();
+            pos = match.capturedEnd() + 1;
+        }
+
+        /*if (digitSpaceDigit.match(input).hasMatch()) {
+            QRegularExpressionMatch match = threeDigits.match(input);
+            //int end = match.capturedEnd();
+            input.remove(match.capturedEnd() - 1);
+            input.insert(match.capturedEnd() + 1, space);
+            pos = input.size();
+        }*/
     }
 
     return Acceptable;
