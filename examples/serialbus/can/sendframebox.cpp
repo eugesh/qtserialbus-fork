@@ -97,6 +97,7 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
     const int maxSize = 2 * m_maxLength;
     const QChar space = QLatin1Char(' ');
     QString data = input;
+    QString input_tmp = input;
     data.remove(space);
 
     if (data.isEmpty())
@@ -113,26 +114,41 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
 
     // insert a space after every two hex nibbles
     // const QRegularExpression insertSpace(QStringLiteral("(?:[[:xdigit:]]{2} )*[[:xdigit:]]{3}"));
-    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
-    //const QRegularExpression digitSpaceDigit(QStringLiteral("\\s*[[:xdigit:]]{1}\\s+[[:xdigit:]]{1}"));
+    // const QRegularExpression oneDigitAndSpace(QStringLiteral("^[[:xdigit:]]{1}(\\s+)"));
+    // const QRegularExpression oneDigitAndSpace(QStringLiteral("(?:\\s*)[[:xdigit:]]{1}(\\s+)"));
 
-    while (threeDigits.match(input).hasMatch() /*|| digitSpaceDigit.match(input).hasMatch()*/) {
-        if (threeDigits.match(input).hasMatch()) {
-            QRegularExpressionMatch match = threeDigits.match(input);
+    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+    const QRegularExpression digitSpaceDigit(QStringLiteral("[[:xdigit:]]{1}(\\s)+[[:xdigit:]]+"));
+    const QRegularExpression oneDigitAndSpace(QStringLiteral("([^[:xdigit:]]|^)([[:xdigit:]]{1})(\\s+)"));
+
+
+    while (threeDigits.match(input_tmp).hasMatch() || oneDigitAndSpace.match(input_tmp).hasMatch()/*digitSpaceDigit.match(input).hasMatch()*/) {
+        if (threeDigits.match(input_tmp).hasMatch()) {
+            QRegularExpressionMatch match = threeDigits.match(input_tmp);
             //int end = match.capturedEnd();
-            input.insert(match.capturedEnd() - 1, space);
+            input_tmp.insert(match.capturedEnd() - 1, space);
             //pos = input.size();
             pos = match.capturedEnd() + 1;
         }
 
+        if (oneDigitAndSpace.match(input_tmp).hasMatch()) {
+            QRegularExpressionMatch match = oneDigitAndSpace.match(input_tmp);
+            int mpos = match.capturedEnd();
+            if (input_tmp.at(match.capturedEnd() - 1) == space)
+                input_tmp.remove(match.capturedEnd() - 1, 1);
+            pos = match.capturedEnd();
+        }
+
         /*if (digitSpaceDigit.match(input).hasMatch()) {
-            QRegularExpressionMatch match = threeDigits.match(input);
-            //int end = match.capturedEnd();
-            input.remove(match.capturedEnd() - 1);
-            input.insert(match.capturedEnd() + 1, space);
-            pos = input.size();
+            QRegularExpressionMatch match = digitSpaceDigit.match(input);
+            input.remove(match.capturedStart() + 1);
+            input.insert(match.capturedStart() + 2, space);
+            //pos = input.size();
+            pos = match.capturedEnd() + 1;
         }*/
     }
+
+    input = input_tmp;
 
     return Acceptable;
 }
