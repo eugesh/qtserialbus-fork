@@ -61,6 +61,34 @@ enum {
     MaxPayloadFd = 64
 };
 
+// brings input string to canonical candump like view
+QString convertToCandumpView(const QString & input) {
+    const QChar space = QLatin1Char(' ');
+    QString out = input;
+
+    QString data = out;
+    data.remove(space);
+    if (data.size() % 2)
+        out.prepend("0");
+
+    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+    const QRegularExpression oneDigitAndSpace(QStringLiteral("([^[:xdigit:]]|^)([[:xdigit:]]{1})(\\s+)"));
+
+    while (oneDigitAndSpace.match(out).hasMatch() || threeDigits.match(out).hasMatch()) {
+        if (threeDigits.match(out).hasMatch()) {
+            QRegularExpressionMatch match = threeDigits.match(out);
+            out.insert(match.capturedEnd() - 1, space);
+        }
+        else if (oneDigitAndSpace.match(out).hasMatch()) {
+            QRegularExpressionMatch match = oneDigitAndSpace.match(out);
+            if (out.at(match.capturedEnd() - 1) == space)
+                out.remove(match.capturedEnd() - 1, 1);
+        }
+    }
+
+    return out;
+}
+
 HexIntegerValidator::HexIntegerValidator(QObject *parent) :
     QValidator(parent),
     m_maximum(MaxStandardId)
@@ -113,39 +141,12 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // insert a space after every two hex nibbles
-    // const QRegularExpression insertSpace(QStringLiteral("(?:[[:xdigit:]]{2} )*[[:xdigit:]]{3}"));
-    // const QRegularExpression oneDigitAndSpace(QStringLiteral("^[[:xdigit:]]{1}(\\s+)"));
-    // const QRegularExpression oneDigitAndSpace(QStringLiteral("(?:\\s*)[[:xdigit:]]{1}(\\s+)"));
-
     const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
-    const QRegularExpression digitSpaceDigit(QStringLiteral("[[:xdigit:]]{1}(\\s)+[[:xdigit:]]+"));
-    const QRegularExpression oneDigitAndSpace(QStringLiteral("([^[:xdigit:]]|^)([[:xdigit:]]{1})(\\s+)"));
 
-
-    while (threeDigits.match(input_tmp).hasMatch() || oneDigitAndSpace.match(input_tmp).hasMatch()/*digitSpaceDigit.match(input).hasMatch()*/) {
-        if (threeDigits.match(input_tmp).hasMatch()) {
-            QRegularExpressionMatch match = threeDigits.match(input_tmp);
-            //int end = match.capturedEnd();
-            input_tmp.insert(match.capturedEnd() - 1, space);
-            //pos = input.size();
-            pos = match.capturedEnd() + 1;
-        }
-
-        if (oneDigitAndSpace.match(input_tmp).hasMatch()) {
-            QRegularExpressionMatch match = oneDigitAndSpace.match(input_tmp);
-            int mpos = match.capturedEnd();
-            if (input_tmp.at(match.capturedEnd() - 1) == space)
-                input_tmp.remove(match.capturedEnd() - 1, 1);
-            pos = match.capturedEnd();
-        }
-
-        /*if (digitSpaceDigit.match(input).hasMatch()) {
-            QRegularExpressionMatch match = digitSpaceDigit.match(input);
-            input.remove(match.capturedStart() + 1);
-            input.insert(match.capturedStart() + 2, space);
-            //pos = input.size();
-            pos = match.capturedEnd() + 1;
-        }*/
+    while (threeDigits.match(input_tmp).hasMatch()) {
+        QRegularExpressionMatch match = threeDigits.match(input_tmp);
+        input_tmp.insert(match.capturedEnd() - 1, space);
+        pos = match.capturedEnd() + 1;
     }
 
     input = input_tmp;
@@ -211,6 +212,7 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();
+        m_ui->payloadEdit->setText(convertToCandumpView(data));
         const QByteArray payload = QByteArray::fromHex(data.remove(QLatin1Char(' ')).toLatin1());
 
         QCanBusFrame frame = QCanBusFrame(frameId, payload);
