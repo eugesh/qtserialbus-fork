@@ -61,6 +61,34 @@ enum {
     MaxPayloadFd = 64
 };
 
+// brings input string to canonical candump like view
+QString convertToCandumpView(const QString & input) {
+    const QChar space = QLatin1Char(' ');
+    QString out = input;
+
+    QString data = out;
+    data.remove(space);
+    if (data.size() % 2)
+        out.prepend("0");
+
+    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+    const QRegularExpression oneDigitAndSpace(QStringLiteral("([^[:xdigit:]]|^)([[:xdigit:]]{1})(\\s+)"));
+
+    while (oneDigitAndSpace.match(out).hasMatch() || threeDigits.match(out).hasMatch()) {
+        if (threeDigits.match(out).hasMatch()) {
+            QRegularExpressionMatch match = threeDigits.match(out);
+            out.insert(match.capturedEnd() - 1, space);
+        }
+        else if (oneDigitAndSpace.match(out).hasMatch()) {
+            QRegularExpressionMatch match = oneDigitAndSpace.match(out);
+            if (out.at(match.capturedEnd() - 1) == space)
+                out.remove(match.capturedEnd() - 1, 1);
+        }
+    }
+
+    return out;
+}
+
 HexIntegerValidator::HexIntegerValidator(QObject *parent) :
     QValidator(parent),
     m_maximum(MaxStandardId)
@@ -112,10 +140,12 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // insert a space after every two hex nibbles
-    const QRegularExpression insertSpace(QStringLiteral("(?:[[:xdigit:]]{2} )*[[:xdigit:]]{3}"));
-    if (insertSpace.match(input).hasMatch()) {
-        input.insert(input.size() - 1, space);
-        pos = input.size();
+    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+
+    while (threeDigits.match(input).hasMatch()) {
+        QRegularExpressionMatch match = threeDigits.match(input);
+        input.insert(match.capturedEnd() - 1, space);
+        pos = match.capturedEnd() + 1;
     }
 
     return Acceptable;
@@ -179,6 +209,7 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();
+        m_ui->payloadEdit->setText(convertToCandumpView(data));
         const QByteArray payload = QByteArray::fromHex(data.remove(QLatin1Char(' ')).toLatin1());
 
         QCanBusFrame frame = QCanBusFrame(frameId, payload);
