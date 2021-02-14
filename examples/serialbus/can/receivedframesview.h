@@ -52,7 +52,6 @@
 #define RECEIVEDFRAMESVIEW_H
 
 #include <QTableView>
-#include <QObject>
 
 class ReceivedFramesView : public QTableView
 {

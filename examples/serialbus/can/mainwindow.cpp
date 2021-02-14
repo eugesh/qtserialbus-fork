@@ -93,12 +93,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
-    m_appendTimer = new QTimer;
+    m_appendTimer = new QTimer(this);
     connect(m_appendTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
     m_appendTimer->start(250);
 
     // Activity check
-    m_sessionTimer = new QTimer;
+    m_sessionTimer = new QTimer(this);
     connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onReceiveActivitiyTimeout);
     m_ui->activeSessionLabel->setText("Time spent: ");
     m_ui->activeSessionTime->setText("0 s, ");
@@ -340,7 +340,7 @@ void MainWindow::onAppendFramesTimeout()
 
 void MainWindow::onReceiveActivitiyTimeout() {
     static qint64 time = 0;
-    const qint64 timeStamp = QDateTime::currentDateTime().toSecsSinceEpoch(); // Change QDateTime to system call?
+    const qint64 timeStamp = QDateTime::currentSecsSinceEpoch(); // Change QDateTime to system call?
 
     if (qAbs(timeStamp - m_last_timestamp) > 1) {
         m_sessionTimer->stop();

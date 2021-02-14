@@ -87,19 +87,17 @@ void ReceivedFramesView::copyRow() {
 
     const QModelIndexList ilist = selectedIndexes();
 
-    QString strRow = "";
+    QString strRow;
 
-    foreach (const QModelIndex ind, ilist) {
-        if (ind.column() == ReceivedFramesModelColumns::DLC)
-            strRow += "[" + ind.data().toString() + "] ";
+    for (const QModelIndex &index : ilist) {
+        if (index.column() == ReceivedFramesModelColumns::DLC)
+            strRow += "[" + index.data().toString() + "] ";
         else
-            strRow += ind.data().toString() + " ";
+            strRow += index.data().toString() + " ";
 
-        if (ind.column() == model()->columnCount() - 1)
+        if (index.column() == model()->columnCount() - 1)
             strRow += '\n';
     }
 
     clipboard->setText(strRow);
-
-    QString tmp_str = clipboard->text();
 }
