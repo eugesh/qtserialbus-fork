@@ -48,8 +48,9 @@
 **
 ****************************************************************************/
 
-#include <iterator>
 #include "receivedframesmodel.h"
+
+#include <iterator>
 
 static constexpr int ColumnCount = 6;
 

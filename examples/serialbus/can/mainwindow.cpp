@@ -340,7 +340,7 @@ void MainWindow::onAppendFramesTimeout()
 
 void MainWindow::onReceiveActivitiyTimeout() {
     static qint64 time = 0;
-    const qint64 timeStamp = QDateTime::currentDateTime().toSecsSinceEpoch(); // Change QDateTime to system call?
+    const qint64 timeStamp = QDateTime::currentSecsSinceEpoch(); // Change QDateTime to system call?
 
     if (qAbs(timeStamp - m_last_timestamp) > 1) {
         m_sessionTimer->stop();
