@@ -51,6 +51,8 @@
 #include "sendframebox.h"
 #include "ui_sendframebox.h"
 
+constexpr char THREE_DIGITS[] = "[[:xdigit:]]{3}";
+
 enum {
     MaxStandardId = 0x7FF,
     MaxExtendedId = 0x10000000
@@ -62,25 +64,23 @@ enum {
 };
 
 // brings input string to canonical candump like view
-QString convertToCandumpView(const QString & input) {
+static QString convertToCandumpView(QString input) {
     const QChar space = QLatin1Char(' ');
     QString out = input;
 
-    QString data = out;
-    data.remove(space);
-    if (data.size() % 2)
+    input.remove(space);
+    if (input.size() % 2)
         out.prepend("0");
 
-    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+    const QRegularExpression threeDigits(THREE_DIGITS);
     const QRegularExpression oneDigitAndSpace(QStringLiteral("([^[:xdigit:]]|^)([[:xdigit:]]{1})(\\s+)"));
 
     while (oneDigitAndSpace.match(out).hasMatch() || threeDigits.match(out).hasMatch()) {
         if (threeDigits.match(out).hasMatch()) {
-            QRegularExpressionMatch match = threeDigits.match(out);
+            const QRegularExpressionMatch match = threeDigits.match(out);
             out.insert(match.capturedEnd() - 1, space);
-        }
-        else if (oneDigitAndSpace.match(out).hasMatch()) {
-            QRegularExpressionMatch match = oneDigitAndSpace.match(out);
+        } else if (oneDigitAndSpace.match(out).hasMatch()) {
+            const QRegularExpressionMatch match = oneDigitAndSpace.match(out);
             if (out.at(match.capturedEnd() - 1) == space)
                 out.remove(match.capturedEnd() - 1, 1);
         }
@@ -140,10 +140,10 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // insert a space after every two hex nibbles
-    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+    const QRegularExpression threeDigits(THREE_DIGITS);
 
     while (threeDigits.match(input).hasMatch()) {
-        QRegularExpressionMatch match = threeDigits.match(input);
+        const QRegularExpressionMatch match = threeDigits.match(input);
         input.insert(match.capturedEnd() - 1, space);
         pos = match.capturedEnd() + 1;
     }
