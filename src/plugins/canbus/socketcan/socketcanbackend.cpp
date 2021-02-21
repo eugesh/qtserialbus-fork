@@ -224,7 +224,7 @@ void SocketCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &value)
+bool SocketCanBackend::applyConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     bool success = false;
 
@@ -349,11 +349,11 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     case QCanBusDevice::BitRateKey:
     {
         const quint32 bitRate = value.toUInt();
-        libSocketCan->setBitrate(canSocketName, bitRate);
+        success = libSocketCan->setBitrate(canSocketName, bitRate);
         break;
     }
     default:
-        setError(tr("SocketCanBackend: No such configuration as %1 in SocketCanBackend").arg(key),
+        setError(tr("Unsupported configuration key: %1").arg(key),
                  QCanBusDevice::CanBusError::ConfigurationError);
         break;
     }
@@ -401,7 +401,7 @@ bool SocketCanBackend::connectSocket()
 
     //apply all stored configurations
     const auto keys = configurationKeys();
-    for (int key : keys) {
+    for (ConfigurationKey key : keys) {
         const QVariant param = configurationParameter(key);
         bool success = applyConfigurationParameter(key, param);
         if (Q_UNLIKELY(!success)) {
@@ -413,7 +413,7 @@ bool SocketCanBackend::connectSocket()
     return true;
 }
 
-void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void SocketCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     if (key == QCanBusDevice::RawFilterKey) {
         //verify valid/supported filters

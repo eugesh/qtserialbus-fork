@@ -39,6 +39,7 @@
 
 #include <QtCore/qscopedpointer.h>
 #include <QtCore/qtimer.h>
+#include <QtCore/QtPlugin>
 #include <QtTest/qsignalspy.h>
 #include <QtTest/qtest.h>
 
@@ -210,7 +211,7 @@ void tst_QCanBusDevice::conf()
     QVariant value = device->configurationParameter(QCanBusDevice::ErrorFilterKey);
     QVERIFY(value.isValid());
 
-    QList<int> keys = device->configurationKeys();
+    QList<QCanBusDevice::ConfigurationKey> keys = device->configurationKeys();
     QCOMPARE(keys.size(), 1);
     QVERIFY(keys.at(0) == QCanBusDevice::ErrorFilterKey);
 
@@ -715,5 +716,7 @@ void tst_QCanBusDevice::tst_waitForFramesWritten()
 }
 
 QTEST_MAIN(tst_QCanBusDevice)
+Q_IMPORT_PLUGIN(GenericBusPlugin)
+Q_IMPORT_PLUGIN(GenericBusPluginV1)
 
 #include "tst_qcanbusdevice.moc"
