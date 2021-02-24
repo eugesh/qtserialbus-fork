@@ -134,7 +134,7 @@ void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
     if (slvector.size() < m_queueLimit)
         m_framesQueue.append(slvector);
     else
-        m_framesQueue.append(slvector.mid(rowCount() - m_queueLimit));
+        m_framesQueue.append(slvector.mid(slvector.size() - m_queueLimit));
 
     endInsertRows();
 }
