@@ -64,10 +64,12 @@ public:
 
     void appendFrame(const QStringList & slist);
     void appendFrames(const QList<QStringList> & slvector);
+    void appendFramesRingBuffer(const QList<QStringList> & slvector);
+    void appendFramesUnlimited(const QList<QStringList> & slvector);
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     void clear();
-    void setQueueLimit(int limit);
+    void setQueueLimit(int limit = 0); // 0 - unlimited
     int getQueueLimit() { return m_queueLimit; }
 
 protected:
@@ -77,7 +79,7 @@ protected:
 
 private:
     QQueue<QStringList> m_framesQueue;
-    int m_queueLimit = 100;
+    int m_queueLimit;
 };
 
 #endif // RECEIVEDFRAMESMODEL_H

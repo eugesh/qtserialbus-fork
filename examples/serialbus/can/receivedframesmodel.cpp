@@ -122,6 +122,14 @@ void ReceivedFramesModel::appendFrame(const QStringList &slist)
 
 void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
 {
+    if (m_queueLimit)
+        appendFramesRingBuffer(slvector);
+    else
+        appendFramesUnlimited(slvector);
+}
+
+void ReceivedFramesModel::appendFramesRingBuffer(const QList<QStringList> & slvector)
+{
     if (m_queueLimit <= (rowCount() + slvector.size())) {
         if (slvector.size() < m_queueLimit)
             removeRows(0, rowCount() + slvector.size() - m_queueLimit + 1);
@@ -135,6 +143,15 @@ void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
         m_framesQueue.append(slvector);
     else
         m_framesQueue.append(slvector.mid(slvector.size() - m_queueLimit));
+
+    endInsertRows();
+}
+
+void ReceivedFramesModel::appendFramesUnlimited(const QList<QStringList> & slvector)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount() + slvector.size() - 1);
+
+    m_framesQueue.append(slvector);
 
     endInsertRows();
 }
@@ -154,6 +171,6 @@ void ReceivedFramesModel::setQueueLimit(int limit)
 {
     m_queueLimit = limit;
 
-    if (m_framesQueue.size() > limit)
+    if (limit && m_framesQueue.size() > limit)
         removeRows(0, m_framesQueue.size() - limit);
 }

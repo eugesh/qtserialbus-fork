@@ -153,6 +153,11 @@ void MainWindow::connectDevice()
 {
     const ConnectDialog::Settings p = m_connectDialog->settings();
 
+    if (p.useModelRingBuffer)
+        m_model->setQueueLimit(p.modelRingBufferSize);
+    else
+        m_model->setQueueLimit(0);
+
     QString errorString;
     m_canDevice.reset(QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
                                                         &errorString));
@@ -333,7 +338,8 @@ void MainWindow::onAppendFramesTimeout()
     if (m_framesAccumulator.count()) {
         m_model->appendFrames(m_framesAccumulator);
         m_framesAccumulator.clear();
-        m_ui->receivedFramesView->scrollToBottom();
+        if (m_connectDialog->settings().useAutoscroll)
+            m_ui->receivedFramesView->scrollToBottom();
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
 }

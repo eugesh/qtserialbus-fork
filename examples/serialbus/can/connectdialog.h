@@ -76,6 +76,10 @@ public:
         QString deviceInterfaceName;
         QList<ConfigurationItem> configurations;
         bool useConfigurationEnabled = false;
+        bool useModelRingBuffer = true;
+        int modelRingBufferSize = 1000;
+        bool useAutoscroll = false;
+        bool useAdaptiveModelUpdate = false;
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);
@@ -88,6 +92,7 @@ private slots:
     void interfaceChanged(const QString &interface);
     void ok();
     void cancel();
+    void on_ringBufferBox_stateChanged(int state);
 
 private:
     QString configurationValue(QCanBusDevice::ConfigurationKey key);
