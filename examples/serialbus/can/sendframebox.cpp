@@ -63,17 +63,23 @@ enum {
     MaxPayloadFd = 64
 };
 
+bool isEvenHex(QString input) {
+    const QChar space = QLatin1Char(' ');
+    input.remove(space);
+
+    if (input.size() % 2)
+        return false;
+
+    return true;
+}
+
 // brings input string to canonical candump like view
-static QString convertToCandumpView(QString input) {
+static QString convertToCandumpView(QString const &input) {
     const QChar space = QLatin1Char(' ');
     QString out = input;
 
-    input.remove(space);
-    if (input.size() % 2)
-        out.prepend("0");
-
     const QRegularExpression threeDigits(THREE_DIGITS);
-    const QRegularExpression oneDigitAndSpace(QStringLiteral("([^[:xdigit:]]|^)([[:xdigit:]]{1})(\\s+)"));
+    const QRegularExpression oneDigitAndSpace(QStringLiteral("((\\s+)|^)([[:xdigit:]]{1})(\\s+)"));
 
     while (oneDigitAndSpace.match(out).hasMatch() || threeDigits.match(out).hasMatch()) {
         if (threeDigits.match(out).hasMatch()) {
@@ -86,7 +92,7 @@ static QString convertToCandumpView(QString input) {
         }
     }
 
-    return out;
+    return out.simplified();
 }
 
 HexIntegerValidator::HexIntegerValidator(QObject *parent) :
@@ -205,6 +211,20 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     };
     connect(m_ui->frameIdEdit, &QLineEdit::textChanged, frameIdTextChanged);
     frameIdTextChanged();
+
+    connect(m_ui->payloadEdit, &QLineEdit::textChanged, this, [this]() {
+        if (!m_ui->frameIdEdit->text().isEmpty() && isEvenHex(m_ui->payloadEdit->text())) {
+            m_ui->sendButton->setToolTip(QString());
+            m_ui->sendButton->setEnabled(true);
+        } else {
+            if (!m_ui->frameIdEdit->text().isEmpty())
+                m_ui->sendButton->setToolTip(tr("Cannot send because Payload hex string is invalid."));
+            else
+                // I would like to call frameIdTextChanged(); but it crashes
+                m_ui->sendButton->setToolTip(tr("Cannot send because no Frame ID was given."));
+            m_ui->sendButton->setEnabled(false);
+        }
+    });
 
     connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
