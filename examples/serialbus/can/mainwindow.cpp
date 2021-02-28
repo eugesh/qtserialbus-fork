@@ -53,11 +53,6 @@
 #include "connectdialog.h"
 #include "receivedframesmodel.h"
 
-#ifdef Q_OS_LINUX
-#include <linux/can.h>
-#else
-
-#endif
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QCloseEvent>
@@ -100,8 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_sessionTimer = new QTimer(this);
     connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onReceiveActivitiyTimeout);
     m_ui->activeSessionLabel->setText("Time spent: ");
-    m_ui->activeSessionTime->setText("0 s, ");
-    m_ui->bitrateIndicator->setText("0 kbit/s");
+    m_ui->activeSessionTime->setText("0 s");
 }
 
 MainWindow::~MainWindow()
@@ -316,7 +310,6 @@ void MainWindow::processReceivedFrames()
         m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
 
         m_last_timestamp = frame.timeStamp().seconds();
-        m_bytesCounter += frame.hasFlexibleDataRateFormat() ? CANFD_MTU : CAN_MTU;
     }
 
     if (!m_sessionTimer->isActive())
@@ -347,12 +340,8 @@ void MainWindow::onReceiveActivitiyTimeout() {
 
     if (qAbs(timeStamp - m_last_timestamp) > 1) {
         m_sessionTimer->stop();
-        m_ui->bitrateIndicator->setText("0 kbit/s");
-        m_bytesCounter = 0;
         return;
     }
     time++; // += static_cast<double>(activityTimeout) / 1000.0;
-    m_ui->activeSessionTime->setText(QString("%1 s, ").arg(time));
-    m_ui->bitrateIndicator->setText(QString("%1 kbit/s").arg(m_bytesCounter * 0.008)); // (8 / 1000)
-    m_bytesCounter = 0;
+    m_ui->activeSessionTime->setText(QString("%1 s").arg(time));
 }
