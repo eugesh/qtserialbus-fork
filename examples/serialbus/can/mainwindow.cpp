@@ -313,8 +313,7 @@ void MainWindow::processReceivedFrames()
         const QString id = QString::asprintf(idFormat, static_cast<uint>(frame.frameId()));
         const QString dlc = QString::asprintf(dlcFormat, frame.payload().size());
 
-        m_framesAccumulator <<
-           QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data});
+        m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
 
         m_last_timestamp = frame.timeStamp().seconds();
         m_bytesCounter += frame.hasFlexibleDataRateFormat() ? CANFD_MTU : CAN_MTU;
@@ -334,9 +333,8 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
 
 void MainWindow::onAppendFramesTimeout()
 {
-    if (m_framesAccumulator.count()) {
-        m_model->appendFrames(m_framesAccumulator);
-        m_framesAccumulator.clear();
+    if (m_model->needUpdate()) {
+        m_model->update();
         if (m_connectDialog->settings().useAutoscroll)
             m_ui->receivedFramesView->scrollToBottom();
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));

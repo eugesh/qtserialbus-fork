@@ -71,6 +71,8 @@ public:
     void clear();
     void setQueueLimit(int limit = 0); // 0 - unlimited
     int getQueueLimit() { return m_queueLimit; }
+    bool needUpdate() const;
+    void update();
 
 protected:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
@@ -79,6 +81,7 @@ protected:
 
 private:
     QQueue<QStringList> m_framesQueue;
+    QList<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
     int m_queueLimit;
 };
 

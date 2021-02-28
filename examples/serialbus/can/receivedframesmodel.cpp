@@ -115,17 +115,25 @@ int ReceivedFramesModel::columnCount(const QModelIndex &parent) const
     return parent.isValid() ? 0 : ColumnCount;
 }
 
-void ReceivedFramesModel::appendFrame(const QStringList &slist)
-{
-    appendFrames({slist});
-}
-
 void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
 {
+    m_framesAccumulator.append(slvector);
+}
+
+bool ReceivedFramesModel::needUpdate() const {
+    return (!m_framesAccumulator.empty());
+}
+
+void ReceivedFramesModel::update() {
+    if (m_framesAccumulator.empty())
+        return;
+
     if (m_queueLimit)
-        appendFramesRingBuffer(slvector);
+        appendFramesRingBuffer(m_framesAccumulator);
     else
-        appendFramesUnlimited(slvector);
+        appendFramesUnlimited(m_framesAccumulator);
+
+    m_framesAccumulator.clear();
 }
 
 void ReceivedFramesModel::appendFramesRingBuffer(const QList<QStringList> &slvector)
@@ -145,6 +153,11 @@ void ReceivedFramesModel::appendFramesRingBuffer(const QList<QStringList> &slvec
         m_framesQueue.append(slvector.mid(slvector.size() - m_queueLimit));
 
     endInsertRows();
+}
+
+void ReceivedFramesModel::appendFrame(const QStringList &slist)
+{
+    appendFrames({slist});
 }
 
 void ReceivedFramesModel::appendFramesUnlimited(const QList<QStringList> &slvector)
