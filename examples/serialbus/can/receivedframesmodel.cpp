@@ -128,7 +128,7 @@ void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
         appendFramesUnlimited(slvector);
 }
 
-void ReceivedFramesModel::appendFramesRingBuffer(const QList<QStringList> & slvector)
+void ReceivedFramesModel::appendFramesRingBuffer(const QList<QStringList> &slvector)
 {
     if (m_queueLimit <= (rowCount() + slvector.size())) {
         if (slvector.size() < m_queueLimit)
@@ -147,7 +147,7 @@ void ReceivedFramesModel::appendFramesRingBuffer(const QList<QStringList> & slve
     endInsertRows();
 }
 
-void ReceivedFramesModel::appendFramesUnlimited(const QList<QStringList> & slvector)
+void ReceivedFramesModel::appendFramesUnlimited(const QList<QStringList> &slvector)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount() + slvector.size() - 1);
 

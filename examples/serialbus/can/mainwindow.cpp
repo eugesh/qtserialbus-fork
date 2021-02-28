@@ -87,7 +87,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_model = new ReceivedFramesModel(this);
     m_ui->receivedFramesView->setModel(m_model);
     m_model->setQueueLimit(1000);
-    // m_ui->receivedFramesView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);

@@ -42,6 +42,8 @@ moc_*
 *-Debug/*
 *.stash
 ui_*.h
+*.orig
+*.rej
 
 # Visual Studio generated files
 *.ib_pdb_index

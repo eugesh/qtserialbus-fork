@@ -51,21 +51,21 @@
 #ifndef RECEIVEDFRAMESMODEL_H
 #define RECEIVEDFRAMESMODEL_H
 
+#include "common.h"
+
 #include <QAbstractTableModel>
 #include <QCanBusFrame>
 #include <QQueue>
-
-#include "common.h"
 
 class ReceivedFramesModel : public QAbstractTableModel
 {
 public:
     explicit ReceivedFramesModel(QObject *parent = nullptr);
 
-    void appendFrame(const QStringList & slist);
-    void appendFrames(const QList<QStringList> & slvector);
-    void appendFramesRingBuffer(const QList<QStringList> & slvector);
-    void appendFramesUnlimited(const QList<QStringList> & slvector);
+    void appendFrame(const QStringList &slist);
+    void appendFrames(const QList<QStringList> &slvector);
+    void appendFramesRingBuffer(const QList<QStringList> &slvector);
+    void appendFramesUnlimited(const QList<QStringList> &slvector);
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     void clear();

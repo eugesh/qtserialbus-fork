@@ -60,5 +60,4 @@ enum ReceivedFramesModelColumns {
     Data
 };
 
-
 #endif // COMMON_H
