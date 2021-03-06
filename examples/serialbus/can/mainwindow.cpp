@@ -302,10 +302,8 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        const char * const idFormat = frame.hasExtendedFrameFormat() ? "%08X" : "     %03X";
-        const char * const dlcFormat = frame.hasFlexibleDataRateFormat() ? "%02d" : "%d";
-        const QString id = QString::asprintf(idFormat, static_cast<uint>(frame.frameId()));
-        const QString dlc = QString::asprintf(dlcFormat, frame.payload().size());
+        const QString id = QString::number(frame.frameId(), 16);
+        const QString dlc = QString::number(frame.payload().size());
 
         m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
 

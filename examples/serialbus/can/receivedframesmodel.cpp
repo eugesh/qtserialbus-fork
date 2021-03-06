@@ -53,6 +53,7 @@
 #include <iterator>
 
 static constexpr int ColumnCount = 6;
+static const QList<int> rightAlignedColumns = {Number, Timestamp, CanID, DLC};
 
 ReceivedFramesModel::ReceivedFramesModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -96,6 +97,11 @@ QVariant ReceivedFramesModel::headerData(int section, Qt::Orientation orientatio
 
 QVariant ReceivedFramesModel::data(const QModelIndex &index, int role) const
 {
+    if (role == Qt::TextAlignmentRole && rightAlignedColumns.contains(index.column()))
+        return QVariant(Qt::AlignRight | Qt::AlignVCenter);
+    else if (role == Qt::TextAlignmentRole && index.column() == Flags)
+        return Qt::AlignCenter;
+
     if (!(role == Qt::DisplayRole) || m_framesQueue.empty())
         return {};
 
