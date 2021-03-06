@@ -62,6 +62,9 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void copyRow();
+
+private slots:
+    void showContextMenu(const QPoint &pos);
 };
 
 #endif // RECEIVEDFRAMESVIEW_H

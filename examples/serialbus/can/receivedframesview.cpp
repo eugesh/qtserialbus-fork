@@ -51,14 +51,19 @@
 #include "common.h"
 #include "receivedframesview.h"
 
+#include <QAction>
 #include <QApplication>
 #include <QClipboard>
 #include <QKeyEvent>
+#include <QMenu>
 
 ReceivedFramesView::ReceivedFramesView(QWidget *parent)
  : QTableView(parent)
 {
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    connect(this, &QWidget::customContextMenuRequested,
+            this, &ReceivedFramesView::showContextMenu);
 }
 
 void ReceivedFramesView::setModel(QAbstractItemModel *model) {
@@ -80,6 +85,22 @@ void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
     } else {
         QTableView::keyPressEvent(event);
     }
+}
+
+void ReceivedFramesView::showContextMenu(const QPoint &pos) {
+    QMenu contextMenu(tr("Context menu"), this);
+
+    QAction action1("Copy", this);
+    QAction action2("Select all", this);
+
+    connect(&action1, &QAction::triggered, this, &ReceivedFramesView::copyRow);
+    connect(&action2, &QAction::triggered, this, &QAbstractItemView::selectAll);
+
+    if (selectedIndexes().count())
+        contextMenu.addAction(&action1);
+    contextMenu.addAction(&action2);
+
+    contextMenu.exec(mapToGlobal(pos));
 }
 
 void ReceivedFramesView::copyRow() {
