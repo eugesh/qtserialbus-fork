@@ -96,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onReceiveActivitiyTimeout);
     m_ui->activeSessionLabel->setText("Time spent: ");
     m_ui->activeSessionTime->setText("0 s");
+    m_ui->bitrateIndicatorBar->setValue(0);
 }
 
 MainWindow::~MainWindow()
@@ -308,6 +309,7 @@ void MainWindow::processReceivedFrames()
         m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
 
         m_last_timestamp = frame.timeStamp().seconds();
+        m_bitCounter += frame.bitsPerFrame();
     }
 
     if (!m_sessionTimer->isActive())
@@ -344,8 +346,13 @@ void MainWindow::onReceiveActivitiyTimeout() {
 
     if (qAbs(timeStamp - m_last_timestamp) > 1) {
         m_sessionTimer->stop();
+        m_ui->bitrateIndicatorBar->setValue(0);
+        m_bitCounter = 0;
         return;
     }
     time++; // += static_cast<double>(activityTimeout) / 1000.0;
     m_ui->activeSessionTime->setText(QString("%1 s").arg(time));
+    m_ui->bitrateIndicatorBar->setValue(static_cast<int>(100 * m_bitCounter /
+        m_canDevice->configurationParameter(QCanBusDevice::BitRateKey).toDouble()));
+    m_bitCounter = 0;
 }
