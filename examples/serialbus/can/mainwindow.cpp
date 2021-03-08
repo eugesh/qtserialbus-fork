@@ -89,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
     m_appendTimer = new QTimer(this);
     connect(m_appendTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
-    m_appendTimer->start(250);
+    m_appendTimer->start(350);
 
     // Activity check
     m_sessionTimer = new QTimer(this);
@@ -324,6 +324,9 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
 
 void MainWindow::onAppendFramesTimeout()
 {
+    if (!m_canDevice)
+        return;
+
     if (m_model->needUpdate()) {
         m_model->update();
         if (m_connectDialog->settings().useAutoscroll)
@@ -333,6 +336,9 @@ void MainWindow::onAppendFramesTimeout()
 }
 
 void MainWindow::onReceiveActivitiyTimeout() {
+    if (!m_canDevice)
+        return;
+
     static qint64 time = 0;
     const qint64 timeStamp = QDateTime::currentSecsSinceEpoch(); // Change QDateTime to system call?
 
