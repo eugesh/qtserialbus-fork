@@ -34,50 +34,45 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSCLIENT_H
-#define QMODBUSCLIENT_H
+#ifndef QMODBUSRTUSERIALSERVER_H
+#define QMODBUSRTUSERIALSERVER_H
 
-#include <QtCore/qobject.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbuspdu.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusClientPrivate;
+class QModbusRtuSerialServerPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
+class Q_SERIALBUS_EXPORT QModbusRtuSerialServer : public QModbusServer
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusClient)
+    Q_DECLARE_PRIVATE(QModbusRtuSerialServer)
 
 public:
-    explicit QModbusClient(QObject *parent = nullptr);
-    ~QModbusClient();
+    explicit QModbusRtuSerialServer(QObject *parent = nullptr);
+    ~QModbusRtuSerialServer();
 
-    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
-    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
-    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
-                                       int serverAddress);
-    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
+    bool processesBroadcast() const override;
 
-    int timeout() const;
-    void setTimeout(int newTimeout);
-
-    int numberOfRetries() const;
-    void setNumberOfRetries(int number);
-
-Q_SIGNALS:
-    void timeoutChanged(int newTimeout);
+    int interFrameDelay() const;
+    void setInterFrameDelay(int microseconds);
 
 protected:
-    QModbusClient(QModbusClientPrivate &dd, QObject *parent = nullptr);
+    QModbusRtuSerialServer(QModbusRtuSerialServerPrivate &dd, QObject *parent = nullptr);
 
-    virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
-    virtual bool processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool open() override;
+    void close() override;
+
+    QModbusResponse processRequest(const QModbusPdu &request) override;
 };
 
+#if QT_DEPRECATED_SINCE(6, 2)
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_GCC("-Wattributes")
+using QModbusRtuSerialSlave
+    Q_DECL_DEPRECATED_X("Please port your application to QModbusRtuSerialServer.") = QModbusRtuSerialServer;
+#endif
+QT_WARNING_POP
 QT_END_NAMESPACE
 
-#endif // QMODBUSCLIENT_H
+#endif // QMODBUSRTUSERIALSERVER_H

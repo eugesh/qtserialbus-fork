@@ -53,7 +53,7 @@
 
 #include <QLoggingCategory>
 #include <QModbusPdu>
-#include <QModbusRtuSerialMaster>
+#include <QModbusRtuSerialClient>
 #include <QSerialPortInfo>
 
 #ifndef QT_STATIC
@@ -149,22 +149,22 @@ void MainWindow::on_connectButton_clicked()
 {
     if (tcpRadio->isChecked()) {
         auto device = new ModbusTcpClient;
-        connect(ti1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+        connect(ti1Spin, &QSpinBox::valueChanged,
                 device, &ModbusTcpClient::valueChanged);
-        connect(ti2Spin, QOverload<int>::of(&QSpinBox::valueChanged),
-                device, &ModbusTcpClient::valueChanged);
-
-        connect(pi1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
-                device, &ModbusTcpClient::valueChanged);
-        connect(pi2Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+        connect(ti2Spin, &QSpinBox::valueChanged,
                 device, &ModbusTcpClient::valueChanged);
 
-        connect(l1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+        connect(pi1Spin, &QSpinBox::valueChanged,
                 device, &ModbusTcpClient::valueChanged);
-        connect(l2Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+        connect(pi2Spin, &QSpinBox::valueChanged,
                 device, &ModbusTcpClient::valueChanged);
 
-        connect(ui1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+        connect(l1Spin, &QSpinBox::valueChanged,
+                device, &ModbusTcpClient::valueChanged);
+        connect(l2Spin, &QSpinBox::valueChanged,
+                device, &ModbusTcpClient::valueChanged);
+
+        connect(ui1Spin, &QSpinBox::valueChanged,
                 device, &ModbusTcpClient::valueChanged);
 
         m_device = device;
@@ -174,7 +174,7 @@ void MainWindow::on_connectButton_clicked()
         m_device->setConnectionParameter(QModbusDevice::NetworkPortParameter,
             tcpPortEdit->text());
     } else {
-        m_device = new QModbusRtuSerialMaster;
+        m_device = new QModbusRtuSerialClient;
         m_device->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
             serialPortCombo->currentText());
 

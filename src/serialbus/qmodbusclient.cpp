@@ -140,13 +140,10 @@ QModbusReply *QModbusClient::sendRawRequest(const QModbusRequest &request, int s
 }
 
 /*!
-    \property QModbusClient::timeout
-    \brief the timeout value used by this client
-
     Returns the timeout value used by this QModbusClient instance in ms.
     A timeout is indicated by a \l TimeoutError. The default value is 1000 ms.
 
-    \sa setTimeout
+    \sa setTimeout timeoutChanged()
 */
 int QModbusClient::timeout() const
 {
@@ -361,7 +358,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
         return;
     }
 
-    if (element.reply->type() != QModbusReply::Common) {
+    if (element.reply->type() == QModbusReply::Broadcast) {
         element.reply->setFinished(true);
         return;
     }

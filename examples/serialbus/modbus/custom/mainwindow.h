@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,74 +48,58 @@
 **
 ****************************************************************************/
 
-#include "bitratebox.h"
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-#include <QLineEdit>
+#include "modbusclient.h"
+#include "modbusserver.h"
 
-BitRateBox::BitRateBox(QWidget *parent) :
-    QComboBox(parent),
-    m_customSpeedValidator(new QIntValidator(0, 1000000, this))
-{
-    fillBitRates();
+#include <QHash>
+#include <QMainWindow>
 
-    connect(this, &QComboBox::currentIndexChanged,
-            this, &BitRateBox::checkCustomSpeedPolicy);
+QT_BEGIN_NAMESPACE
+
+class QLineEdit;
+
+namespace Ui {
+class MainWindow;
 }
 
-BitRateBox::~BitRateBox()
+QT_END_NAMESPACE
+
+class RegisterModel;
+
+class MainWindow : public QMainWindow
 {
-    delete m_customSpeedValidator;
-}
+    Q_OBJECT
 
-int BitRateBox::bitRate() const
-{
-    if (currentIndex() == (count() - 1))
-        return currentText().toInt();
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 
-    return itemData(currentIndex()).toInt();
-}
+private Q_SLOTS:
+    void onConnectButtonClicked();
+    void onStateChanged(int state);
 
-bool BitRateBox::isFlexibleDataRateEnabled() const
-{
-    return m_isFlexibleDataRateEnabled;
-}
+    void onReadReady();
+    void onReadButtonClicked();
+    void onWriteButtonClicked();
 
-void BitRateBox::setFlexibleDateRateEnabled(bool enabled)
-{
-    m_isFlexibleDataRateEnabled = enabled;
-    m_customSpeedValidator->setTop(enabled ? 10000000 : 1000000);
-    fillBitRates();
-}
+    void setRegister(const QString &value);
+    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
 
-void BitRateBox::checkCustomSpeedPolicy(int idx)
-{
-    const bool isCustomSpeed = !itemData(idx).isValid();
-    setEditable(isCustomSpeed);
-    if (isCustomSpeed) {
-        clearEditText();
-        lineEdit()->setValidator(m_customSpeedValidator);
-    }
-}
+private:
+    void setupConnections();
+    void setupClientContainer();
+    void setupServerContainer();
 
-void BitRateBox::fillBitRates()
-{
-    const QList<int> rates = {
-        10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000
-    };
-    const QList<int> dataRates = {
-        2000000, 4000000, 8000000
-    };
+private:
+    Ui::MainWindow *ui = nullptr;
+    RegisterModel *m_model = nullptr;
 
-    clear();
+    ModbusClient m_client;
+    ModbusServer m_server;
+    QHash<QString, QLineEdit *> m_registers;
+};
 
-    for (int rate : rates)
-        addItem(QString::number(rate), rate);
-
-    if (isFlexibleDataRateEnabled()) {
-        for (int rate : dataRates)
-            addItem(QString::number(rate), rate);
-    }
-
-    addItem(tr("Custom"));
-    setCurrentIndex(6); // default is 500000 bits/sec
-}
+#endif // MAINWINDOW_H

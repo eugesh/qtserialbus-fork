@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,74 +48,38 @@
 **
 ****************************************************************************/
 
-#include "bitratebox.h"
+#ifndef REGISTERMODEL_H
+#define REGISTERMODEL_H
 
-#include <QLineEdit>
+#include <QAbstractItemModel>
 
-BitRateBox::BitRateBox(QWidget *parent) :
-    QComboBox(parent),
-    m_customSpeedValidator(new QIntValidator(0, 1000000, this))
+class RegisterModel : public QAbstractTableModel
 {
-    fillBitRates();
+    Q_OBJECT
 
-    connect(this, &QComboBox::currentIndexChanged,
-            this, &BitRateBox::checkCustomSpeedPolicy);
-}
+public:
+    RegisterModel(QObject *parent = nullptr);
 
-BitRateBox::~BitRateBox()
-{
-    delete m_customSpeedValidator;
-}
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-int BitRateBox::bitRate() const
-{
-    if (currentIndex() == (count() - 1))
-        return currentText().toInt();
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    return itemData(currentIndex()).toInt();
-}
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-bool BitRateBox::isFlexibleDataRateEnabled() const
-{
-    return m_isFlexibleDataRateEnabled;
-}
+public slots:
+    void setStartAddress(int address);
+    void setNumberOfValues(const QString &number);
 
-void BitRateBox::setFlexibleDateRateEnabled(bool enabled)
-{
-    m_isFlexibleDataRateEnabled = enabled;
-    m_customSpeedValidator->setTop(enabled ? 10000000 : 1000000);
-    fillBitRates();
-}
+signals:
+    void updateViewport();
 
-void BitRateBox::checkCustomSpeedPolicy(int idx)
-{
-    const bool isCustomSpeed = !itemData(idx).isValid();
-    setEditable(isCustomSpeed);
-    if (isCustomSpeed) {
-        clearEditText();
-        lineEdit()->setValidator(m_customSpeedValidator);
-    }
-}
+public:
+    int m_number = 0;
+    int m_address = 0;
+    QList<quint16> m_registers;
+};
 
-void BitRateBox::fillBitRates()
-{
-    const QList<int> rates = {
-        10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000
-    };
-    const QList<int> dataRates = {
-        2000000, 4000000, 8000000
-    };
-
-    clear();
-
-    for (int rate : rates)
-        addItem(QString::number(rate), rate);
-
-    if (isFlexibleDataRateEnabled()) {
-        for (int rate : dataRates)
-            addItem(QString::number(rate), rate);
-    }
-
-    addItem(tr("Custom"));
-    setCurrentIndex(6); // default is 500000 bits/sec
-}
+#endif // REGISTERMODEL_H

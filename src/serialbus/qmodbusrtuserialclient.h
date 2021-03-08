@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -34,50 +34,44 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSCLIENT_H
-#define QMODBUSCLIENT_H
+#ifndef QMODBUSRTUSERIALCLIENT_H
+#define QMODBUSRTUSERIALCLIENT_H
 
-#include <QtCore/qobject.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbuspdu.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusClientPrivate;
+class QModbusRtuSerialClientPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
+class Q_SERIALBUS_EXPORT QModbusRtuSerialClient : public QModbusClient
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusClient)
+    Q_DECLARE_PRIVATE(QModbusRtuSerialClient)
 
 public:
-    explicit QModbusClient(QObject *parent = nullptr);
-    ~QModbusClient();
+    explicit QModbusRtuSerialClient(QObject *parent = nullptr);
+    ~QModbusRtuSerialClient();
 
-    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
-    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
-    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
-                                       int serverAddress);
-    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
+    int interFrameDelay() const;
+    void setInterFrameDelay(int microseconds);
 
-    int timeout() const;
-    void setTimeout(int newTimeout);
-
-    int numberOfRetries() const;
-    void setNumberOfRetries(int number);
-
-Q_SIGNALS:
-    void timeoutChanged(int newTimeout);
+    int turnaroundDelay() const;
+    void setTurnaroundDelay(int turnaroundDelay);
 
 protected:
-    QModbusClient(QModbusClientPrivate &dd, QObject *parent = nullptr);
+    QModbusRtuSerialClient(QModbusRtuSerialClientPrivate &dd, QObject *parent = nullptr);
 
-    virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
-    virtual bool processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    void close() override;
+    bool open() override;
 };
 
+#if QT_DEPRECATED_SINCE(6, 2)
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_GCC("-Wattributes")
+using QModbusRtuSerialMaster
+    Q_DECL_DEPRECATED_X("Please port your application to QModbusRtuSerialClient.") = QModbusRtuSerialClient;
+#endif
+QT_WARNING_POP
 QT_END_NAMESPACE
 
-#endif // QMODBUSCLIENT_H
+#endif // QMODBUSRTUSERIALCLIENT_H

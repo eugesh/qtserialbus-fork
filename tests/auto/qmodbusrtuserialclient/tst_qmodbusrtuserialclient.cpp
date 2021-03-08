@@ -34,50 +34,28 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSCLIENT_H
-#define QMODBUSCLIENT_H
+#include <QtSerialBus/qmodbusrtuserialclient.h>
 
-#include <QtCore/qobject.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbuspdu.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtTest/QtTest>
 
-QT_BEGIN_NAMESPACE
-
-class QModbusClientPrivate;
-
-class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
+class tst_QModbusRtuSerialClient : public QObject
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusClient)
 
-public:
-    explicit QModbusClient(QObject *parent = nullptr);
-    ~QModbusClient();
-
-    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
-    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
-    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
-                                       int serverAddress);
-    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
-
-    int timeout() const;
-    void setTimeout(int newTimeout);
-
-    int numberOfRetries() const;
-    void setNumberOfRetries(int number);
-
-Q_SIGNALS:
-    void timeoutChanged(int newTimeout);
-
-protected:
-    QModbusClient(QModbusClientPrivate &dd, QObject *parent = nullptr);
-
-    virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
-    virtual bool processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data);
+private slots:
+    void testInterFrameDelay()
+    {
+        QModbusRtuSerialClient qmrsm;
+        QCOMPARE(qmrsm.interFrameDelay(), 2000);
+        qmrsm.setInterFrameDelay(1000);
+        QCOMPARE(qmrsm.interFrameDelay(), 2000);
+        qmrsm.setInterFrameDelay(3000);
+        QCOMPARE(qmrsm.interFrameDelay(), 3000);
+        qmrsm.setInterFrameDelay(-1);
+        QCOMPARE(qmrsm.interFrameDelay(), 2000);
+    }
 };
 
-QT_END_NAMESPACE
+QTEST_MAIN(tst_QModbusRtuSerialClient)
 
-#endif // QMODBUSCLIENT_H
+#include "tst_qmodbusrtuserialclient.moc"
