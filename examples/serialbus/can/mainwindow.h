@@ -110,6 +110,8 @@ private:
     QTimer *m_sessionTimer = nullptr;
     static int constexpr activityTimeout = 1000; // [ms]
     qint64 m_last_timestamp; // [s]
+    // Bitrate indicator
+    double m_bitCounter = 0.0;
 };
 
 #endif // MAINWINDOW_H
