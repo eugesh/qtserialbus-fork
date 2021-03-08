@@ -79,7 +79,6 @@ public:
         bool useModelRingBuffer = true;
         int modelRingBufferSize = 1000;
         bool useAutoscroll = false;
-        bool useAdaptiveModelUpdate = false;
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);

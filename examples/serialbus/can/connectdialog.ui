@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>542</width>
-    <height>548</height>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -252,13 +252,6 @@
             </property>
             <property name="text">
              <string>Autoscroll</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="adoptiveModelBox">
-            <property name="text">
-             <string>Use adoptive update timer</string>
             </property>
            </widget>
           </item>

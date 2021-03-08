@@ -198,7 +198,6 @@ void ConnectDialog::updateSettings()
     m_currentSettings.useModelRingBuffer = m_ui->ringBufferBox->isChecked();
     m_currentSettings.modelRingBufferSize = m_ui->ringBufferLimitBox->value();
     m_currentSettings.useAutoscroll = m_ui->autoscrollBox->isChecked();
-    m_currentSettings.useAdaptiveModelUpdate = m_ui->adoptiveModelBox->isChecked();
 
     if (m_currentSettings.useConfigurationEnabled) {
         m_currentSettings.configurations.clear();
