@@ -52,7 +52,6 @@
 #define MAINWINDOW_H
 
 #include <QCanBusDevice>
-
 #include <QMainWindow>
 
 class ConnectDialog;
@@ -87,7 +86,6 @@ private slots:
     void disconnectDevice();
     void processFramesWritten(qint64);
     void onAppendFramesTimeout();
-    void onReceiveActivitiyTimeout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -106,12 +104,6 @@ private:
     QTimer *m_busStatusTimer = nullptr;
     QTimer *m_appendTimer = nullptr;
     ReceivedFramesModel *m_model = nullptr;
-    // Active session timer
-    QTimer *m_sessionTimer = nullptr;
-    static int constexpr activityTimeout = 1000; // [ms]
-    qint64 m_last_timestamp; // [s]
-    // Bitrate indicator
-    double m_bitCounter = 0.0;
 };
 
 #endif // MAINWINDOW_H

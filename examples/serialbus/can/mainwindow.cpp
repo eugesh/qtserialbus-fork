@@ -90,13 +90,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_appendTimer = new QTimer(this);
     connect(m_appendTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
     m_appendTimer->start(350);
-
-    // Activity check
-    m_sessionTimer = new QTimer(this);
-    connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::onReceiveActivitiyTimeout);
-    m_ui->activeSessionLabel->setText("Time spent: ");
-    m_ui->activeSessionTime->setText("0 s");
-    m_ui->bitrateIndicatorBar->setValue(0);
 }
 
 MainWindow::~MainWindow()
@@ -307,13 +300,7 @@ void MainWindow::processReceivedFrames()
         const QString dlc = QString::number(frame.payload().size());
 
         m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
-
-        m_last_timestamp = frame.timeStamp().seconds();
-        m_bitCounter += frame.bitsPerFrame();
     }
-
-    if (!m_sessionTimer->isActive())
-        m_sessionTimer->start(activityTimeout);
 }
 
 void MainWindow::sendFrame(const QCanBusFrame &frame) const
@@ -335,24 +322,4 @@ void MainWindow::onAppendFramesTimeout()
             m_ui->receivedFramesView->scrollToBottom();
         m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
     }
-}
-
-void MainWindow::onReceiveActivitiyTimeout() {
-    if (!m_canDevice)
-        return;
-
-    static qint64 time = 0;
-    const qint64 timeStamp = QDateTime::currentSecsSinceEpoch(); // Change QDateTime to system call?
-
-    if (qAbs(timeStamp - m_last_timestamp) > 1) {
-        m_sessionTimer->stop();
-        m_ui->bitrateIndicatorBar->setValue(0);
-        m_bitCounter = 0;
-        return;
-    }
-    time++; // += static_cast<double>(activityTimeout) / 1000.0;
-    m_ui->activeSessionTime->setText(QString("%1 s").arg(time));
-    m_ui->bitrateIndicatorBar->setValue(static_cast<int>(100 * m_bitCounter /
-        m_canDevice->configurationParameter(QCanBusDevice::BitRateKey).toDouble()));
-    m_bitCounter = 0;
 }
