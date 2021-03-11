@@ -85,6 +85,7 @@ private slots:
     void busStatus();
     void disconnectDevice();
     void processFramesWritten(qint64);
+    void handleActivityTimeout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -99,6 +100,12 @@ private:
     ConnectDialog *m_connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
+    // Active session timer
+    QTimer *m_sessionTimer = nullptr;
+    qint64 m_lastTimeStamp = 0; // [s]
+    qint64 m_time = 0;
+    // Bitrate indicator
+    double m_bitCounter = 0.0;
 };
 
 #endif // MAINWINDOW_H

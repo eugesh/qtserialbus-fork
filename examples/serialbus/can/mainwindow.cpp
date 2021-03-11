@@ -52,16 +52,22 @@
 #include "ui_mainwindow.h"
 #include "connectdialog.h"
 
+#include <cmath>
+
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QCloseEvent>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QTimer>
+
+static int constexpr activityTimeout = 1000; // [ms]
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
-    m_busStatusTimer(new QTimer(this))
+    m_busStatusTimer(new QTimer(this)),
+    m_sessionTimer(new QTimer(this))
 {
     m_ui->setupUi(this);
 
@@ -77,6 +83,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
+
+    // Activity check
+    connect(m_sessionTimer, &QTimer::timeout, this, &MainWindow::handleActivityTimeout);
+    m_ui->activeSessionLabel->setText("Time spent: ");
+    m_ui->activeSessionTime->setText("0 s");
+    m_ui->bitrateIndicatorBar->setValue(0);
 }
 
 MainWindow::~MainWindow()
@@ -278,7 +290,13 @@ void MainWindow::processReceivedFrames()
         const QString flags = frameFlags(frame);
 
         m_ui->receivedMessagesEdit->append(time + flags + view);
+
+        m_lastTimeStamp = frame.timeStamp().seconds();
+        m_bitCounter += frame.bitsPerFrame();
     }
+
+    if (!m_sessionTimer->isActive())
+        m_sessionTimer->start(activityTimeout);
 }
 
 void MainWindow::sendFrame(const QCanBusFrame &frame) const
@@ -287,4 +305,30 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
         return;
 
     m_canDevice->writeFrame(frame);
+}
+
+void MainWindow::handleActivityTimeout() {
+    if (!m_canDevice)
+        return;
+
+    const qint64 timeStamp = QDateTime::currentSecsSinceEpoch();
+
+    if (qAbs(timeStamp - m_lastTimeStamp) > 1) {
+        m_sessionTimer->stop();
+        m_ui->bitrateIndicatorBar->setValue(0);
+        m_bitCounter = 0;
+        return;
+    }
+    m_time++;
+    m_ui->activeSessionTime->setText(QString("%1 s").arg(m_time));
+
+    double bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey).toDouble();
+    if (std::isnormal(bitRate))  {
+       m_ui->bitrateIndicatorBar->setMaximum(100);
+       m_ui->bitrateIndicatorBar->setValue(qRound(100 * m_bitCounter / bitRate));
+    } else {
+       m_ui->bitrateIndicatorBar->setMaximum(0); // Busy indicator
+    }
+
+    m_bitCounter = 0;
 }
