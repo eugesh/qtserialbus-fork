@@ -64,8 +64,6 @@ public:
 
     void appendFrame(const QStringList &slist);
     void appendFrames(const QList<QStringList> &slvector);
-    void appendFramesRingBuffer(const QList<QStringList> &slvector);
-    void appendFramesUnlimited(const QList<QStringList> &slvector);
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     void clear();
@@ -80,9 +78,13 @@ protected:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
 private:
+    void appendFramesRingBuffer(const QList<QStringList> &slvector);
+    void appendFramesUnlimited(const QList<QStringList> &slvector);
+
+private:
     QQueue<QStringList> m_framesQueue;
     QList<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
-    int m_queueLimit;
+    int m_queueLimit = 0;
 };
 
 #endif // RECEIVEDFRAMESMODEL_H

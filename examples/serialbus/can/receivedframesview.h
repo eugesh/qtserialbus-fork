@@ -53,18 +53,15 @@
 
 #include <QTableView>
 
-class ReceivedFramesView : public QTableView
+class ReceivedFramesView final: public QTableView
 {
 public:
-    ReceivedFramesView(QWidget *parent = nullptr);
-    void setModel(QAbstractItemModel *model) override;
+    explicit ReceivedFramesView(QWidget *parent = nullptr);
+    void setModel(QAbstractItemModel *model) final;
 
 protected:
-    void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) final;
     void copyRow();
-
-private slots:
-    void showContextMenu(const QPoint &pos);
 };
 
 #endif // RECEIVEDFRAMESVIEW_H

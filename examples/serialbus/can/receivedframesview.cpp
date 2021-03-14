@@ -60,21 +60,34 @@
 ReceivedFramesView::ReceivedFramesView(QWidget *parent)
  : QTableView(parent)
 {
-    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(this, &QWidget::customContextMenuRequested,
-            this, &ReceivedFramesView::showContextMenu);
+        [this] (const QPoint &pos) {
+        QMenu contextMenu(tr("Context menu"), this);
+
+        QAction action1("Copy", this);
+        QAction action2("Select all", this);
+
+        connect(&action1, &QAction::triggered, this, &ReceivedFramesView::copyRow);
+        connect(&action2, &QAction::triggered, this, &QAbstractItemView::selectAll);
+
+        if (selectedIndexes().count())
+            contextMenu.addAction(&action1);
+        contextMenu.addAction(&action2);
+
+        contextMenu.exec(mapToGlobal(pos));
+    });
 }
 
-void ReceivedFramesView::setModel(QAbstractItemModel *model) {
+void ReceivedFramesView::setModel(QAbstractItemModel *model)
+{
     QTableView::setModel(model);
 
-    setColumnWidth(ReceivedFramesModelColumns::Number, 80);
-    setColumnWidth(ReceivedFramesModelColumns::Timestamp, 130);
-    setColumnWidth(ReceivedFramesModelColumns::Flags, 25);
-    setColumnWidth(ReceivedFramesModelColumns::CanID, 50);
-    setColumnWidth(ReceivedFramesModelColumns::DLC, 25);
-    setColumnWidth(ReceivedFramesModelColumns::Data, 200);
+    for (int i = 0, count = model->columnCount(); i < count; i++) {
+        const QSize size = model->headerData(i, Qt::Horizontal, Qt::SizeHintRole).value<QSize>();
+        setColumnWidth(i, size.width());
+    }
 }
 
 void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
@@ -87,22 +100,6 @@ void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-void ReceivedFramesView::showContextMenu(const QPoint &pos) {
-    QMenu contextMenu(tr("Context menu"), this);
-
-    QAction action1("Copy", this);
-    QAction action2("Select all", this);
-
-    connect(&action1, &QAction::triggered, this, &ReceivedFramesView::copyRow);
-    connect(&action2, &QAction::triggered, this, &QAbstractItemView::selectAll);
-
-    if (selectedIndexes().count())
-        contextMenu.addAction(&action1);
-    contextMenu.addAction(&action2);
-
-    contextMenu.exec(mapToGlobal(pos));
-}
-
 void ReceivedFramesView::copyRow() {
     QClipboard *clipboard = QApplication::clipboard();
 
@@ -111,11 +108,7 @@ void ReceivedFramesView::copyRow() {
     QString strRow;
 
     for (const QModelIndex &index : ilist) {
-        if (index.column() == ReceivedFramesModelColumns::DLC)
-            strRow += "[" + index.data().toString() + "] ";
-        else
-            strRow += index.data().toString() + " ";
-
+        strRow += index.data(ClipboardTextRole).toString() + " ";
         if (index.column() == model()->columnCount() - 1)
             strRow += '\n';
     }

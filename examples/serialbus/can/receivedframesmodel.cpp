@@ -51,9 +51,16 @@
 #include "receivedframesmodel.h"
 
 #include <iterator>
+#include <QSize>
 
-static constexpr int ColumnCount = 6;
-static const QList<int> rightAlignedColumns = {Number, Timestamp, CanID, DLC};
+constexpr int ColumnAlignment[] = {
+    Qt::AlignRight | Qt::AlignVCenter,
+    Qt::AlignRight | Qt::AlignVCenter,
+    Qt::AlignCenter,
+    Qt::AlignRight | Qt::AlignVCenter,
+    Qt::AlignRight | Qt::AlignVCenter,
+    Qt::AlignLeft | Qt::AlignVCenter
+};
 
 ReceivedFramesModel::ReceivedFramesModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -92,23 +99,47 @@ QVariant ReceivedFramesModel::headerData(int section, Qt::Orientation orientatio
         }
     }
 
+    if ((role == Qt::SizeHintRole) && (orientation == Qt::Horizontal)) {
+        switch (section) {
+        case Number:
+            return QSize(80, 25);
+        case Timestamp:
+            return QSize(130, 25);
+        case Flags:
+            return QSize(25, 25);
+        case CanID:
+            return QSize(50, 25);
+        case DLC:
+            return QSize(25, 25);
+        case Data:
+            return QSize(200, 25);
+        }
+    }
+
     return {};
 }
 
 QVariant ReceivedFramesModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::TextAlignmentRole && rightAlignedColumns.contains(index.column()))
-        return QVariant(Qt::AlignRight | Qt::AlignVCenter);
-    else if (role == Qt::TextAlignmentRole && index.column() == Flags)
-        return Qt::AlignCenter;
-
-    if (!(role == Qt::DisplayRole) || m_framesQueue.empty())
+    if (m_framesQueue.empty())
         return {};
 
     const int row = index.row();
     const int column = index.column();
 
-    return m_framesQueue.at(row).at(column);
+    switch (role) {
+    case Qt::TextAlignmentRole:
+        return ColumnAlignment[index.column()];
+    case Qt::DisplayRole:
+        return m_framesQueue.at(row).at(column);
+    case ClipboardTextRole:
+        if (index.column() == DLC)
+            return QString("[%1]").arg(m_framesQueue.at(row).at(column));
+        else
+            return m_framesQueue.at(row).at(column);
+    default:
+        return {};
+    }
 }
 
 int ReceivedFramesModel::rowCount(const QModelIndex &parent) const
@@ -118,7 +149,7 @@ int ReceivedFramesModel::rowCount(const QModelIndex &parent) const
 
 int ReceivedFramesModel::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : ColumnCount;
+    return parent.isValid() ? 0 : Count;
 }
 
 void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
@@ -127,7 +158,7 @@ void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
 }
 
 bool ReceivedFramesModel::needUpdate() const {
-    return (!m_framesAccumulator.empty());
+    return !m_framesAccumulator.empty();
 }
 
 void ReceivedFramesModel::update() {

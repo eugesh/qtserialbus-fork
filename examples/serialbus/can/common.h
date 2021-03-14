@@ -51,13 +51,20 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <qnamespace.h>
+
 enum ReceivedFramesModelColumns {
     Number = 0,
     Timestamp,
     Flags,
     CanID,
     DLC,
-    Data
+    Data,
+    Count
+};
+
+enum : int {
+  ClipboardTextRole = Qt::UserRole + 1
 };
 
 #endif // COMMON_H

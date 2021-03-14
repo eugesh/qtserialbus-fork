@@ -259,8 +259,5 @@ void ConnectDialog::updateSettings()
 
 void ConnectDialog::on_ringBufferBox_stateChanged(int state)
 {
-    if (state == Qt::CheckState::Checked)
-        m_ui->ringBufferLimitBox->setEnabled(true);
-    else
-        m_ui->ringBufferLimitBox->setEnabled(false);
+    m_ui->ringBufferLimitBox->setEnabled(state == Qt::CheckState::Checked);
 }
