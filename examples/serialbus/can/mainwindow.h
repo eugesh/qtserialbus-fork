@@ -87,7 +87,7 @@ private slots:
     void disconnectDevice();
     void processFramesWritten(qint64);
     void onAppendFramesTimeout();
-    void onReceiveActivitiyTimeout();
+    void handleActivityTimeout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -108,8 +108,8 @@ private:
     ReceivedFramesModel *m_model = nullptr;
     // Active session timer
     QTimer *m_sessionTimer = nullptr;
-    static int constexpr activityTimeout = 1000; // [ms]
-    qint64 m_last_timestamp; // [s]
+    qint64 m_lastTimeStamp = 0; // [s]
+    qint64 m_time = 0;
     // Bitrate indicator
     double m_bitCounter = 0.0;
 };
